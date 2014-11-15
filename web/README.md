@@ -1,0 +1,1 @@
+This folder is needed by flambe.
