@@ -1,4 +1,4 @@
 hxPixels
 ========
 
-An hxperimental cross-target/lib Pixels abstract, in Haxe 3.1+
+An hxperimental (cross-target/cross-lib) Pixels abstract, in Haxe 3.1+
