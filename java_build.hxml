@@ -1,0 +1,5 @@
+-cp src/
+-cp ../../src/
+-main src.JavaAbstractPixelsDemo
+-debug
+-java bin/java

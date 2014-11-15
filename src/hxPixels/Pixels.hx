@@ -1,16 +1,16 @@
-package hxPixels;
+package #if (java) src. #end hxPixels;
 
 import haxe.io.Bytes;
 import haxe.io.BytesData;
 
 
-@:forward
 /**
  * Class abstracting pixels for various libs/targets (for easier manipulation).
  * The underlying bytes will be in ARGB format (and implicitly converted to that when needed).
  * 
  * @author azrafe7
  */
+@:forward
 abstract Pixels(PixelsData)
 {
 	/** 
@@ -171,9 +171,48 @@ abstract Pixels(PixelsData)
 	
 		return bmd;
 	}
+
+#elseif java
+
+	@:from static public function fromBufferedImage(image:java.awt.image.BufferedImage) {
+		var pixels = new Pixels(image.getWidth(), image.getHeight(), true);
+		
+		var imageARGB = image;
+		
+		/* TODO: it seems the buffer has always bytes in RGBA, so maybe there's no need to convert?
+		if (image.getType() != java.awt.image.BufferedImage.TYPE_INT_ARGB) {
+			trace("before", image.getType());
+			imageARGB = Converter.convert(image, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			trace("after", imageARGB.getType());
+		}*/
+		
+		var buffer = new java.NativeArray<Int>(pixels.bytes.length);
+		imageARGB.getRaster().getPixels(0, 0, pixels.width, pixels.height, buffer);
+		
+		for (i in 0...buffer.length) pixels.bytes.set(i, buffer[i]);
+		Converter.RGBA2ARGB(pixels.bytes);
+		
+		return pixels;
+	}
+	
+	public function applyTo(image:java.awt.image.BufferedImage) {
+		var imageType = image.getType();
+		
+		var bytesRGBA = Bytes.alloc(this.bytes.length);
+		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
+		
+		var buffer = new java.NativeArray<Int>(this.bytes.length);
+		for (i in 0...buffer.length) buffer[i] = bytesRGBA.get(i);
+		
+		image.getRaster().setPixels(0, 0, this.width, this.height, buffer);
+	}
+	
 #end
 }
 
+#if java
+@:allow(src.hxPixels.Pixels)
+#end
 @:allow(hxPixels.Pixels)
 private class PixelsData
 {
@@ -207,7 +246,7 @@ private class PixelsData
 class Converter
 {
 	/** Converts from ARGB to RGBA. If `outBytesRGBA` is null then `inBytesARGB` will be converted in place. */
-	static public function ARGB2RGBA(inBytesARGB:Bytes, ?outBytesRGBA:Bytes):Bytes {
+	static public function ARGB2RGBA(inBytesARGB:Bytes, ?outBytesRGBA:Bytes):Void {
 		var convertInPlace = outBytesRGBA == null;
 		
 		if (!convertInPlace) {
@@ -231,12 +270,10 @@ class Converter
 				outBytesRGBA.set(pos + 2, b);
 			}
 		}
-		
-		return outBytesRGBA;
 	}
 	
 	/** Converts from ARGB to RGBA. If `outBytesARGB` is null then `inBytesRGBA` will be converted in place. */
-	static public function RGBA2ARGB(inBytesRGBA:Bytes, ?outBytesARGB:Bytes):Bytes {
+	static public function RGBA2ARGB(inBytesRGBA:Bytes, ?outBytesARGB:Bytes):Void {
 		var convertInPlace = outBytesARGB == null;
 		
 		if (!convertInPlace) {
@@ -260,7 +297,19 @@ class Converter
 				outBytesARGB.set(pos + 3, b);
 			}
 		}
+	}
+	
+#if java
+
+	/** Converts `inImage` into a new image of `imageType` format. */
+	static public function convert(inImage:java.awt.image.BufferedImage, imageType:Int):java.awt.image.BufferedImage
+	{
+		var outImage = new java.awt.image.BufferedImage(inImage.getWidth(), inImage.getHeight(), imageType);
+		var g2d = outImage.createGraphics();
+		g2d.drawImage(inImage, 0, 0, null);
+		g2d.dispose();
 		
-		return outBytesARGB;
-	}	
+		return outImage;
+	}
+#end
 }

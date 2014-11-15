@@ -36,19 +36,19 @@ class FlambeAbstractPixelsDemo
         System.root.addChild(new Entity().add(sprite));
 		
 		// load texture into pixels abstract
-		var startTime = haxe.Timer.stamp();
+		var startTime = Timer.stamp();
 		var pixels:Pixels = texture;
-		trace("load", haxe.Timer.stamp() - startTime);
+		trace("load", Timer.stamp() - startTime);
 		
 		// add random red points
-		startTime = haxe.Timer.stamp();
+		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
 		trace("set", Timer.stamp() - startTime);
 		
 		// apply the modified pixels back to texture
-		startTime = haxe.Timer.stamp();
+		startTime = Timer.stamp();
 		pixels.applyTo(texture);
 		trace("apply", Timer.stamp() - startTime);
     }

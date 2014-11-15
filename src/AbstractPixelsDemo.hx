@@ -36,19 +36,19 @@ class AbstractPixelsDemo extends Sprite {
 		addChild(bitmap);
 		
 		// load bitmapData into pixels abstract
-		var startTime = haxe.Timer.stamp();
+		var startTime = Timer.stamp();
 		var pixels:Pixels = bitmapData;
-		trace("load", haxe.Timer.stamp() - startTime);
+		trace("load", Timer.stamp() - startTime);
 		
 		// add random red points
-		startTime = haxe.Timer.stamp();
+		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
 		trace("set", Timer.stamp() - startTime);
 		
 		// apply the modified pixels back to bitmapData
-		startTime = haxe.Timer.stamp();
+		startTime = Timer.stamp();
 		pixels.applyTo(bitmapData);
 		trace("apply", Timer.stamp() - startTime);
 		
