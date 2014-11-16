@@ -1,4 +1,4 @@
-package #if (java) src. #end hxPixels;
+package hxPixels;
 
 import haxe.io.Bytes;
 import haxe.io.BytesData;
@@ -210,9 +210,6 @@ abstract Pixels(PixelsData)
 #end
 }
 
-#if java
-@:allow(src.hxPixels.Pixels)
-#end
 @:allow(hxPixels.Pixels)
 private class PixelsData
 {

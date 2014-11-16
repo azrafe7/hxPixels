@@ -15,14 +15,14 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="." />
+    <class path="src" />
   </classpaths>
   <!-- Build options -->
   <build>
     <option directives="" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
-    <option mainClass="src.JavaAbstractPixelsDemo" />
+    <option mainClass="JavaAbstractPixelsDemo" />
     <option enabledebug="False" />
     <option additional="" />
   </build>
