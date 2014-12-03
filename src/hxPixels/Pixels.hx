@@ -78,13 +78,9 @@ abstract Pixels(PixelsData)
 	}
 
 	
-#if flambe	// in flambe texture bytes are in RGBA format, and we want ARGB
+#if (flambe	&& html) // in flambe texture bytes are in RGBA format, and we want ARGB
 
 	@:from static public function fromTexture(texture:flambe.display.Texture) {
-	#if flash
-		throw "Not supported";
-	#end
-
 		var pixels = new Pixels(texture.width, texture.height, false);
 		
 		// read pixels bytes in RGBA and then convert them in place to ARGB
@@ -95,16 +91,12 @@ abstract Pixels(PixelsData)
 	}
 	
 	public function applyTo(texture:flambe.display.Texture) {
-	#if flash
-		throw "Not supported";
-	#end
-	
 		var bytesRGBA = Bytes.alloc(this.width * this.height);
 		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
 		texture.writePixels(bytesRGBA, 0, 0, this.width, this.height);
 	}
 	
-#elseif (flash || openfl || nme)
+#elseif (flash || openfl || nme || (flambe && flash))
 
 	@:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
 	#if js	

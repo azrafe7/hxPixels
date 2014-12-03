@@ -10,6 +10,11 @@ import flambe.display.ImageSprite;
 import haxe.Timer;
 import hxPixels.Pixels;
 
+#if flash
+@:bitmap("assets/global/galapagosColor.png")
+class GalapagosColor extends flash.display.BitmapData { }
+#end
+
 class FlambeAbstractPixelsDemo
 {
     private static function main ()
@@ -33,11 +38,17 @@ class FlambeAbstractPixelsDemo
 		
 		// show the sprite
         var sprite = new ImageSprite(texture).centerAnchor().setXY(System.stage.width/2, System.stage.height/2);
-        System.root.addChild(new Entity().add(sprite));
+        var entity = new Entity().add(sprite);
+		System.root.addChild(entity);
 		
 		// load texture into pixels abstract
 		var startTime = Timer.stamp();
+	#if html
 		var pixels:Pixels = texture;
+	#else
+		var bitmapData = new GalapagosColor(0, 0);
+		var pixels:Pixels = bitmapData;
+	#end
 		trace("load", Timer.stamp() - startTime);
 		
 		// add random red points
@@ -49,7 +60,15 @@ class FlambeAbstractPixelsDemo
 		
 		// apply the modified pixels back to texture
 		startTime = Timer.stamp();
+	#if	html
 		pixels.applyTo(texture);
+	#else
+		pixels.applyTo(bitmapData);
+		entity.remove(sprite);
+		texture = System.renderer.createTextureFromImage(bitmapData);
+        sprite = new ImageSprite(texture).centerAnchor().setXY(System.stage.width/2, System.stage.height/2);
+        entity.add(sprite);
+	#end
 		trace("apply", Timer.stamp() - startTime);
     }
 }
