@@ -76,9 +76,14 @@ abstract Pixels(PixelsData)
 		this.bytes.set((pos + 2), g);
 		this.bytes.set((pos + 3), b);
 	}
-
 	
-#if (flambe	&& html) // in flambe texture bytes are in RGBA format, and we want ARGB
+	public function clone():Pixels {
+		var clone:Pixels = new Pixels(this.width, this.height, true);
+		clone.bytes.blit(0, this.bytes, 0, this.bytes.length);
+		return clone;
+	}
+	
+#if (flambe) // in flambe texture bytes are in RGBA format, and we want ARGB
 
 	@:from static public function fromTexture(texture:flambe.display.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, false);
@@ -90,11 +95,13 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 	
+	#if (flambe && html) // not possible in (flambe && flash) due to Stage3D limitations
 	public function applyTo(texture:flambe.display.Texture) {
 		var bytesRGBA = Bytes.alloc(this.width * this.height);
 		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
 		texture.writePixels(bytesRGBA, 0, 0, this.width, this.height);
 	}
+	#end
 	
 #elseif (flash || openfl || nme || (flambe && flash))
 
