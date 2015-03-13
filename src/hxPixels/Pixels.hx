@@ -102,8 +102,10 @@ abstract Pixels(PixelsData)
 		texture.writePixels(bytesRGBA, 0, 0, this.width, this.height);
 	}
 	#end
-	
-#elseif (snow || luxe) // in snow/luxe texture bytes are in RGBA format, and we want ARGB
+
+#end
+
+#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format, and we want ARGB
 	
 	@:from static public function fromSnowTexture(texture:phoenix.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, true);
