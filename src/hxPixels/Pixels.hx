@@ -103,6 +103,31 @@ abstract Pixels(PixelsData)
 	}
 	#end
 	
+#elseif (snow || luxe) // in snow/luxe texture bytes are in RGBA format, and we want ARGB
+	
+	@:from static public function fromSnowTexture(texture:phoenix.Texture) {
+		var pixels = new Pixels(texture.width, texture.height, true);
+		
+		var data = texture.asset.image.data;
+		
+		// read pixels bytes in RGBA and then convert them in place to ARGB
+		for (i in 0...data.byteLength) {
+			pixels.bytes.set(i, data[i]);
+		}
+		Converter.RGBA2ARGB(pixels.bytes);
+		
+		return pixels;
+	}
+	
+	public function applyTo(texture:phoenix.Texture) {
+		var bytesRGBA = Bytes.alloc(this.width * this.height);
+		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
+		var data = texture.asset.image.data;
+		for (i in 0...this.bytes.length << 2) data[i] = bytesRGBA.get(i);
+		
+		texture.reset();  // rebind texture
+	}
+
 #elseif (flash || openfl || nme || (flambe && flash))
 
 	@:from static public function fromBitmapData(bmd:flash.display.BitmapData) {

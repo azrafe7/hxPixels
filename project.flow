@@ -1,0 +1,38 @@
+{
+
+  luxe:{
+    window: {
+      width:1024,
+      height:780,
+      title:'pixels',
+      fullscreen:false,
+      resizable:true,
+      borderless:false
+    }
+  },
+
+  project : {
+    name : 'empty',
+    version : '1.0.0',
+    author : 'luxeengine',
+
+    app : {
+	  main: 'LuxeAbstractPixelsDemo',
+	  output: 'bin/luxe',
+      name : 'luxe_empty',
+      package : 'com.luxeengine.empty'
+    },
+
+    build : {
+      dependencies : {
+        luxe : '*',
+      }
+    },
+
+    files : {
+      assets : 'assets/'
+    }
+
+  }
+
+}
