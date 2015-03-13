@@ -53,7 +53,7 @@ class AbstractPixelsDemo extends Sprite {
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info
-		trace("pixels    ", pixels.width, pixels.height, pixels.length, StringTools.hex(pixels.getPixel32(300, 300)));
+		trace("pixels    ", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(300, 300)));
 		trace("bitmapData", bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(300, 300)));
 		
 		

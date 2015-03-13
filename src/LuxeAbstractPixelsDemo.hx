@@ -33,11 +33,13 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		var pixels:Pixels = texture;
 		trace("load " + (Timer.stamp() - start));
 		
+		start = Timer.stamp();
 		for (i in 0...10000) {
 			var color = 0xFF0000;
 			pixels.setPixel32(Std.int(Math.random() * texture.width), Std.int(Math.random() * texture.height), 
 							  0xFF000000 | color);
 		}
+		trace("set " + (Timer.stamp() - start));
 		
 		start = Timer.stamp();
 		pixels.applyTo(texture);

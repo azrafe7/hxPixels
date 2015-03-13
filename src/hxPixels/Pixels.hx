@@ -15,7 +15,7 @@ abstract Pixels(PixelsData)
 {
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
-	 * but the other properties (width, height, length) will still be set.
+	 * but the other properties (width, height, count) will still be set.
 	 */
 	inline public function new(width:Int, height:Int, alloc:Bool = true) 
 	{
@@ -97,7 +97,7 @@ abstract Pixels(PixelsData)
 	
 	#if (flambe && html) // not possible in (flambe && flash) due to Stage3D limitations
 	public function applyTo(texture:flambe.display.Texture) {
-		var bytesRGBA = Bytes.alloc(this.width * this.height);
+		var bytesRGBA = Bytes.alloc(this.bytes.length);
 		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
 		texture.writePixels(bytesRGBA, 0, 0, this.width, this.height);
 	}
@@ -108,23 +108,29 @@ abstract Pixels(PixelsData)
 	@:from static public function fromSnowTexture(texture:phoenix.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, true);
 		
-		var data = texture.asset.image.data;
+		var data:snow.utils.UInt8Array = texture.asset.image.data;
 		
 		// read pixels bytes in RGBA and then convert them in place to ARGB
-		for (i in 0...data.byteLength) {
-			pixels.bytes.set(i, data[i]);
+		for (i in 0...pixels.count) {
+			var pos = i << 2;
+			pixels.bytes.set(pos + 0, data[pos + 3]);
+			pixels.bytes.set(pos + 1, data[pos + 0]);
+			pixels.bytes.set(pos + 2, data[pos + 1]);
+			pixels.bytes.set(pos + 3, data[pos + 2]);
 		}
-		Converter.RGBA2ARGB(pixels.bytes);
 		
 		return pixels;
 	}
 	
 	public function applyTo(texture:phoenix.Texture) {
-		var bytesRGBA = Bytes.alloc(this.width * this.height);
-		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
-		var data = texture.asset.image.data;
-		for (i in 0...this.bytes.length << 2) data[i] = bytesRGBA.get(i);
-		
+		var data:snow.utils.UInt8Array = texture.asset.image.data;
+		for (i in 0...this.count) {
+			var pos = i << 2;
+			data[pos + 3] = getByte(pos + 0);
+			data[pos + 0] = getByte(pos + 1);
+			data[pos + 1] = getByte(pos + 2);
+			data[pos + 2] = getByte(pos + 3);
+		}
 		texture.reset();  // rebind texture
 	}
 
@@ -165,12 +171,6 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 	
-	@:to public function toBitmapData():flash.display.BitmapData {
-		var bmd:flash.display.BitmapData = new flash.display.BitmapData(this.width, this.height);
-		
-		return applyTo(bmd);
-	}
-	
 	public function applyTo(bmd:flash.display.BitmapData) {
 	#if !js
 		
@@ -195,8 +195,6 @@ abstract Pixels(PixelsData)
 		}
 		
 	#end
-	
-		return bmd;
 	}
 
 #elseif java
@@ -254,8 +252,8 @@ abstract Pixels(PixelsData)
 @:allow(hxPixels.Pixels)
 private class PixelsData
 {
-	/** Length (in pixels NOT bytes). */
-	public var length(default, null):Int;
+	/** Total number of pixels. */
+	public var count(default, null):Int;
 	
 	/** Bytes representing the pixels (in ARGB). */
 	public var bytes(default, null):Bytes;
@@ -268,13 +266,13 @@ private class PixelsData
 	
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
-	 * but the other properties (width, height, length) will still be set.
+	 * but the other properties (width, height, count) will still be set.
 	 */
 	public function new(width:Int, height:Int, alloc:Bool = true)
 	{
-		this.length = width * height;
+		this.count = width * height;
 		
-		if (alloc) bytes = Bytes.alloc(this.length << 2);
+		if (alloc) bytes = Bytes.alloc(this.count << 2);
 		
 		this.width = width;
 		this.height = height;

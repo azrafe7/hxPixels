@@ -59,7 +59,7 @@ class JavaAbstractPixelsDemo extends JFrame implements KeyListener {
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info
-		trace("pixels", pixels.width, pixels.height, pixels.length, StringTools.hex(pixels.getPixel32(300, 300)));
+		trace("pixels", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(300, 300)));
 		trace("image ", image.getWidth(), image.getHeight(), image.getWidth() * image.getHeight(), StringTools.hex(image.getRGB(300, 300)));
 		
         
