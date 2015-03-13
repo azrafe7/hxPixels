@@ -49,14 +49,14 @@ class FlambeAbstractPixelsDemo
 		var bitmapData = new GalapagosColor(0, 0);
 		var pixels:Pixels = bitmapData;
 	#end
-		trace("load", Timer.stamp() - startTime);
+		log("load " + (Timer.stamp() - startTime));
 		
 		// add random red points
 		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
-		trace("set", Timer.stamp() - startTime);
+		log("set " + (Timer.stamp() - startTime));
 		
 		// apply the modified pixels back to texture
 		startTime = Timer.stamp();
@@ -69,6 +69,14 @@ class FlambeAbstractPixelsDemo
         sprite = new ImageSprite(texture).centerAnchor().setXY(System.stage.width/2, System.stage.height/2);
         entity.add(sprite);
 	#end
-		trace("apply", Timer.stamp() - startTime);
+		log("apply " + (Timer.stamp() - startTime));
     }
+	
+	static public function log(x:Dynamic):Void {
+	#if flash
+		flash.external.ExternalInterface.call("console.log", x);
+	#else
+		trace(x);
+	#end
+	}
 }
