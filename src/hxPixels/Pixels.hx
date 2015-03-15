@@ -12,13 +12,15 @@ import haxe.io.Bytes;
 @:forward
 abstract Pixels(PixelsData)
 {
+	static inline var CHANNEL_MASK:Int = 3;
+	
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
 	 */
 	inline public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null) 
 	{
-		this = new PixelsData(width, height, alloc);
+		this = new PixelsData(width, height, alloc, format);
 	}
 	
 	inline public function setFormat(format:ColorFormat):Void {
@@ -26,15 +28,15 @@ abstract Pixels(PixelsData)
 	}
 	
 	inline public function getByte(i:Int) {
-		return this.bytes.get(i);
+		return this.bytes.get((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK]);
 	}
 	
 	inline public function getPixel(x:Int, y:Int) {
 		var pos = (y * this.width + x) << 2;
 		
-		var r = this.bytes.get(pos + 1) << 16;
-		var g = this.bytes.get(pos + 2) << 8;
-		var b = this.bytes.get(pos + 3);
+		var r = this.bytes.get(pos + this.format.R) << 16;
+		var g = this.bytes.get(pos + this.format.G) << 8;
+		var b = this.bytes.get(pos + this.format.B);
 		
 		return r | g | b;
 	}
@@ -42,16 +44,16 @@ abstract Pixels(PixelsData)
 	inline public function getPixel32(x:Int, y:Int) {
 		var pos = (y * this.width + x) << 2;
 		
-		var a = this.bytes.get(pos + 0) << 24;
-		var r = this.bytes.get(pos + 1) << 16;
-		var g = this.bytes.get(pos + 2) << 8;
-		var b = this.bytes.get(pos + 3);
+		var a = this.bytes.get(pos + this.format.A) << 24;
+		var r = this.bytes.get(pos + this.format.R) << 16;
+		var g = this.bytes.get(pos + this.format.G) << 8;
+		var b = this.bytes.get(pos + this.format.B);
 		
 		return a | r | g | b;
 	}
 	
 	inline public function setByte(i:Int, value:Int) {
-		this.bytes.set(i, value);
+		this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
 	}
 	
 	inline public function setPixel(x:Int, y:Int, value:Int) {
@@ -61,9 +63,9 @@ abstract Pixels(PixelsData)
 		var g = (value >> 8) & 0xFF;
 		var b = (value) & 0xFF;
 
-		this.bytes.set((pos + 1), r);
-		this.bytes.set((pos + 2), g);
-		this.bytes.set((pos + 3), b);
+		this.bytes.set(pos + this.format.R, r);
+		this.bytes.set(pos + this.format.G, g);
+		this.bytes.set(pos + this.format.B, b);
 	}
 	
 	inline public function setPixel32(x:Int, y:Int, value:Int) {
@@ -74,10 +76,10 @@ abstract Pixels(PixelsData)
 		var g = (value >> 8) & 0xFF;
 		var b = (value) & 0xFF;
 
-		this.bytes.set((pos + 0), a);
-		this.bytes.set((pos + 1), r);
-		this.bytes.set((pos + 2), g);
-		this.bytes.set((pos + 3), b);
+		this.bytes.set((pos + this.format.A), a);
+		this.bytes.set((pos + this.format.R), r);
+		this.bytes.set((pos + this.format.G), g);
+		this.bytes.set((pos + this.format.B), b);
 	}
 	
 	public function clone():Pixels {
@@ -255,7 +257,7 @@ abstract Pixels(PixelsData)
 }
 
 @:allow(hxPixels.Pixels)
-private class PixelsData implements ArrayAccess<Int>
+private class PixelsData
 {
 	/** Total number of pixels. */
 	public var count(default, null):Int;
@@ -285,15 +287,6 @@ private class PixelsData implements ArrayAccess<Int>
 		this.width = width;
 		this.height = height;
 		this.format = format != null ? format : ColorFormat.ARGB;
-	}
-	
-	public function get(i:Int):Int {
-		return bytes.get(i);
-	}
-	
-	public function set(i:Int, value:Int):Int {
-		bytes.set(i, value);
-		return value;
 	}
 }
 
@@ -346,6 +339,8 @@ class ColorFormat {
 	var CHANNEL_1 = 1;
 	var CHANNEL_2 = 2;
 	var CHANNEL_3 = 3;
+	
+	@:op(A + B) static function add(a:Int, b:Channel):Int;
 }
 
 class Converter
