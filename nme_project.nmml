@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	
-	<meta title="AbstractPixelsDemo" package="lib.pixels.hx" version="1.0.0" company="azrafe7" />
+	<meta title="NMEAbstractPixelsDemo" package="lib.pixels.hx" version="1.0.0" company="azrafe7" />
 	<app main="AbstractPixelsDemo" path="bin/nme" file="AbstractPixelsDemo" />
 	<window background="#FFFFFF" fps="60" />
 	<window width="1024" height="780" unless="mobile" />
