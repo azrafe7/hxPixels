@@ -2,6 +2,7 @@ package hxPixels;
 
 import haxe.io.Bytes;
 import haxe.io.BytesData;
+import hxPixels.Pixels.ColorFormat;
 
 
 /**
@@ -17,9 +18,13 @@ abstract Pixels(PixelsData)
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
 	 */
-	inline public function new(width:Int, height:Int, alloc:Bool = true) 
+	inline public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null) 
 	{
 		this = new PixelsData(width, height, alloc);
+	}
+	
+	inline public function setFormat(format:ColorFormat):Void {
+		this.format = format;
 	}
 	
 	inline public function getByte(i:Int) {
@@ -266,11 +271,14 @@ private class PixelsData
 	/** Height of the source image. */
 	public var height(default, null):Int;
 	
+	/** Internal pixel format. */
+	public var format:ColorFormat;
+	
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
 	 */
-	public function new(width:Int, height:Int, alloc:Bool = true)
+	public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null)
 	{
 		this.count = width * height;
 		
@@ -278,7 +286,59 @@ private class PixelsData
 		
 		this.width = width;
 		this.height = height;
+		this.format = format != null ? format : ColorFormat.ARGB;
 	}
+}
+
+class ColorFormat {
+	
+	static public var ARGB(default, null):ColorFormat;
+	static public var RGBA(default, null):ColorFormat;
+	
+	public var channelMap(default, null):Array<Channel>;
+	
+	var name:String;
+	
+	static function __init__():Void {
+		ARGB = new ColorFormat(CHANNEL_0, CHANNEL_1, CHANNEL_2, CHANNEL_3, "ARGB");
+		RGBA = new ColorFormat(CHANNEL_3, CHANNEL_0, CHANNEL_1, CHANNEL_2, "RGBA");
+	}
+	
+	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "ColorFormat"):Void {
+		this.channelMap = [a, r, g, b];
+		this.name = name;
+	}
+	
+	public var A(get, null):Int;
+	inline private function get_A():Int {
+		return channelMap[0];
+	}
+	
+	public var R(get, null):Int;
+	inline private function get_R():Int {
+		return channelMap[1];
+	}
+	
+	public var G(get, null):Int;
+	inline private function get_G():Int {
+		return channelMap[2];
+	}
+	
+	public var B(get, null):Int;
+	inline private function get_B():Int {
+		return channelMap[3];
+	}
+	
+	public function toString():String {
+		return name;
+	}
+}
+
+@:enum abstract Channel(Int) to Int {
+	var CHANNEL_0 = 0;
+	var CHANNEL_1 = 1;
+	var CHANNEL_2 = 2;
+	var CHANNEL_3 = 3;
 }
 
 class Converter
