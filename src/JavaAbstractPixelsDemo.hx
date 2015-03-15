@@ -55,7 +55,7 @@ class JavaAbstractPixelsDemo extends JFrame implements KeyListener {
 		
 		// apply the modified pixels back to image
 		startTime = haxe.Timer.stamp();
-		pixels.applyTo(image);
+		pixels.applyToBufferedImage(image);
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info

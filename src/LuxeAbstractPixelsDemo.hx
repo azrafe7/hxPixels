@@ -42,7 +42,7 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		trace("set " + (Timer.stamp() - start));
 		
 		start = Timer.stamp();
-		pixels.applyTo(texture);
+		pixels.applyToSnowTexture(texture);
 		trace("apply " + (Timer.stamp() - start));
 	}
 	

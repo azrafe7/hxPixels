@@ -49,7 +49,7 @@ class AbstractPixelsDemo extends Sprite {
 		
 		// apply the modified pixels back to bitmapData
 		startTime = Timer.stamp();
-		pixels.applyTo(bitmapData);
+		pixels.applyToBitmapData(bitmapData);
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info

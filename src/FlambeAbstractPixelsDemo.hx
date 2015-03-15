@@ -61,9 +61,9 @@ class FlambeAbstractPixelsDemo
 		// apply the modified pixels back to texture
 		startTime = Timer.stamp();
 	#if	html
-		pixels.applyTo(texture);
+		pixels.applyToFlambeTexture(texture);
 	#else
-		pixels.applyTo(bitmapData);
+		pixels.applyToBitmapData(bitmapData);
 		entity.remove(sprite);
 		texture = System.renderer.createTextureFromImage(bitmapData);
         sprite = new ImageSprite(texture).centerAnchor().setXY(System.stage.width/2, System.stage.height/2);
