@@ -1,8 +1,6 @@
 package hxPixels;
 
 import haxe.io.Bytes;
-import haxe.io.BytesData;
-import hxPixels.Pixels.ColorFormat;
 
 
 /**
@@ -257,12 +255,12 @@ abstract Pixels(PixelsData)
 }
 
 @:allow(hxPixels.Pixels)
-private class PixelsData
+private class PixelsData implements ArrayAccess<Int>
 {
 	/** Total number of pixels. */
 	public var count(default, null):Int;
 	
-	/** Bytes representing the pixels (in ARGB). */
+	/** Bytes representing the pixels (in `format` color format). */
 	public var bytes(default, null):Bytes;
 	
 	/** Width of the source image. */
@@ -280,13 +278,22 @@ private class PixelsData
 	 */
 	public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null)
 	{
-		this.count = width * height;
-		
 		if (alloc) bytes = Bytes.alloc(this.count << 2);
+		
+		this.count = width * height;
 		
 		this.width = width;
 		this.height = height;
 		this.format = format != null ? format : ColorFormat.ARGB;
+	}
+	
+	public function get(i:Int):Int {
+		return bytes.get(i);
+	}
+	
+	public function set(i:Int, value:Int):Int {
+		bytes.set(i, value);
+		return value;
 	}
 }
 
