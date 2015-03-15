@@ -5,7 +5,12 @@ import haxe.io.Bytes;
 
 /**
  * Class abstracting pixels for various libs/targets (for easier manipulation).
- * The underlying bytes will be in ARGB format (and implicitly converted to that when needed).
+ * 
+ * The exposed get/set methods will transparently work in ARGB format, while
+ * the underlying bytes' color format will be automatically inferenced when one 
+ * of the `from_` methods is called.
+ * 
+ * You can still override the channel mapping by setting `format` afterwards.
  * 
  * @author azrafe7
  */
@@ -18,19 +23,17 @@ abstract Pixels(PixelsData)
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
 	 */
-	inline public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null) 
+	inline public function new(width:Int, height:Int, alloc:Bool = true) 
 	{
-		this = new PixelsData(width, height, alloc, format);
+		this = new PixelsData(width, height, alloc);
 	}
 	
-	inline public function setFormat(format:ColorFormat):Void {
-		this.format = format;
-	}
-	
+	/** Byte value at `i` position, as if the data were in ARGB format. */
 	inline public function getByte(i:Int) {
 		return this.bytes.get((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK]);
 	}
 	
+	/** Pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
 	inline public function getPixel(x:Int, y:Int) {
 		var pos = (y * this.width + x) << 2;
 		
@@ -41,6 +44,7 @@ abstract Pixels(PixelsData)
 		return r | g | b;
 	}
 	
+	/** Pixel value (with alpha) at `x`,`y`, as if the data were in ARGB format. */
 	inline public function getPixel32(x:Int, y:Int) {
 		var pos = (y * this.width + x) << 2;
 		
@@ -52,10 +56,12 @@ abstract Pixels(PixelsData)
 		return a | r | g | b;
 	}
 	
+	/** Sets the byte value at `i` pos, as if the data were in ARGB format. */
 	inline public function setByte(i:Int, value:Int) {
 		this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
 	}
 	
+	/** Sets the pixel value (without alpha) at `x`,`y`, with `value` expressed in RGB format. */
 	inline public function setPixel(x:Int, y:Int, value:Int) {
 		var pos = (y * this.width + x) << 2;
 		
@@ -68,6 +74,7 @@ abstract Pixels(PixelsData)
 		this.bytes.set(pos + this.format.B, b);
 	}
 	
+	/** Sets the pixel value (with alpha) at `x`,`y`, with `value` expressed in ARGB format. */
 	inline public function setPixel32(x:Int, y:Int, value:Int) {
 		var pos = (y * this.width + x) << 2;
 		
@@ -88,74 +95,59 @@ abstract Pixels(PixelsData)
 		return clone;
 	}
 	
-#if (flambe) // in flambe texture bytes are in RGBA format, and we want ARGB
+#if (flambe) // in flambe texture bytes are in RGBA format
 
-	@:from static public function fromTexture(texture:flambe.display.Texture) {
+	@:from static public function fromFlambeTexture(texture:flambe.display.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, false);
+		pixels.format = ColorFormat.RGBA;
 		
-		// read pixels bytes in RGBA and then convert them in place to ARGB
 		pixels.bytes = texture.readPixels(0, 0, texture.width, texture.height);
-		Converter.RGBA2ARGB(pixels.bytes);
 		
 		return pixels;
 	}
 	
 	#if (flambe && html) // not possible in (flambe && flash) due to Stage3D limitations
-	public function applyTo(texture:flambe.display.Texture) {
-		var bytesRGBA = Bytes.alloc(this.bytes.length);
-		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
-		texture.writePixels(bytesRGBA, 0, 0, this.width, this.height);
+	public function applyToFlambeTexture(texture:flambe.display.Texture) {
+		texture.writePixels(this.bytes, 0, 0, this.width, this.height);
 	}
 	#end
 
 #end
 
-#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format, and we want ARGB
+#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format
 	
 	@:from static public function fromSnowTexture(texture:phoenix.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, true);
+		pixels.format = ColorFormat.RGBA;
 		
 		var data:snow.utils.UInt8Array = texture.asset.image.data;
 		
-		// read pixels bytes in RGBA and then convert them in place to ARGB
-		for (i in 0...pixels.count) {
-			var pos = i << 2;
-			pixels.bytes.set(pos + 0, data[pos + 3]);
-			pixels.bytes.set(pos + 1, data[pos + 0]);
-			pixels.bytes.set(pos + 2, data[pos + 1]);
-			pixels.bytes.set(pos + 3, data[pos + 2]);
+		for (i in 0...pixels.bytes.length) {
+			pixels.bytes.set(i, data[i]);
 		}
 		
 		return pixels;
 	}
 	
-	public function applyTo(texture:phoenix.Texture) {
+	public function applyToSnowTexture(texture:phoenix.Texture) {
 		var data:snow.utils.UInt8Array = texture.asset.image.data;
-		for (i in 0...this.count) {
-			var pos = i << 2;
-			data[pos + 3] = getByte(pos + 0);
-			data[pos + 0] = getByte(pos + 1);
-			data[pos + 1] = getByte(pos + 2);
-			data[pos + 2] = getByte(pos + 3);
+		
+		for (i in 0...this.bytes.length) {
+			data[i] = this.bytes.get(i);
 		}
 		texture.reset();  // rebind texture
 	}
+#end
 
-#elseif (flash || openfl || nme || (flambe && flash))
+#if (flash || openfl || nme || (flambe && flash))
 
 	@:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
 	#if js	
 	
 		var pixels = new Pixels(bmd.width, bmd.height);
+		pixels.format = ColorFormat.ARGB;
 		
-		/* NOTE: alternative way, but seems slower
-		var bv = bmd.getPixels(bmd.rect).byteView;
-
-		for (i in 0...bv.length) {
-			var pos = (i % 4) != 3 ? i + 1 : i - 3; // `bv` is in RGBA and we want ARGB
-			pixels.bytes.set(pos, bv[i]);
-		}*/
-		
+		// this seems faster than other alternatives using getPixels/getVector
 		for (y in 0...pixels.height) {
 			for (x in 0...pixels.width) {
 				pixels.setPixel32(x, y, bmd.getPixel32(x, y));
@@ -165,6 +157,8 @@ abstract Pixels(PixelsData)
 	#else
 		
 		var pixels = new Pixels(bmd.width, bmd.height, false);
+		pixels.format = ColorFormat.ARGB;
+		
 		var ba = bmd.getPixels(bmd.rect);
 		
 		#if flash
@@ -178,9 +172,17 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 	
-	public function applyTo(bmd:flash.display.BitmapData) {
-	#if !js
+	public function applyToBitmapData(bmd:flash.display.BitmapData) {
+	#if js
 		
+		for (y in 0...this.height) {
+			for (x in 0...this.width) {
+				bmd.setPixel32(x, y, getPixel32(x, y));
+			}
+		}
+		
+	#else
+	
 		var ba = bmd.getPixels(bmd.rect);
 		
 		#if (openfl && !flash)
@@ -193,56 +195,41 @@ abstract Pixels(PixelsData)
 		ba.position = 0;
 		bmd.setPixels(bmd.rect, ba);
 		
-	#else
-	
-		for (y in 0...this.height) {
-			for (x in 0...this.width) {
-				bmd.setPixel32(x, y, getPixel32(x, y));
-			}
-		}
-		
 	#end
 	}
 
-#elseif java
+#end
+
+#if java
 
 	@:from static public function fromBufferedImage(image:java.awt.image.BufferedImage) {
 		var pixels = new Pixels(image.getWidth(), image.getHeight(), true);
-		
-		var imageARGB = image;
-		
-		/* NOTE: it seems the buffer has always bytes in RGBA, so there's no need to convert
-		if (image.getType() != java.awt.image.BufferedImage.TYPE_INT_ARGB) {
-			trace("before", image.getType());
-			imageARGB = Converter.convert(image, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-			trace("after", imageARGB.getType());
-		}*/
+		pixels.format = ColorFormat.RGBA;
 		
 		var buffer = new java.NativeArray<Int>(pixels.bytes.length);
-		imageARGB.getRaster().getPixels(0, 0, pixels.width, pixels.height, buffer);
+		buffer = image.getRaster().getPixels(0, 0, pixels.width, pixels.height, buffer);
 		
 		for (i in 0...buffer.length) pixels.bytes.set(i, buffer[i]);
-		Converter.RGBA2ARGB(pixels.bytes);
 		
 		return pixels;
 	}
 	
-	public function applyTo(image:java.awt.image.BufferedImage) {
+	public function applyToBufferedImage(image:java.awt.image.BufferedImage) {
 		var imageType = image.getType();
 		
-		var bytesRGBA = Bytes.alloc(this.bytes.length);
-		Converter.ARGB2RGBA(this.bytes, bytesRGBA);
-		
 		var buffer = new java.NativeArray<Int>(this.bytes.length);
-		for (i in 0...buffer.length) buffer[i] = bytesRGBA.get(i);
+		for (i in 0...buffer.length) buffer[i] = this.bytes.get(i);
 		
 		image.getRaster().setPixels(0, 0, this.width, this.height, buffer);
 	}
 
-#elseif js	// plain js - conversion from ImageData
+#end
+
+#if js	// plain js - conversion from ImageData
 
 	@:from static public function fromImageData(image:js.html.ImageData) {
 		var pixels = new Pixels(image.width, image.height, true);
+		pixels.format = ColorFormat.ARGB;
 		
 		var data = image.data;
 		
@@ -259,6 +246,8 @@ abstract Pixels(PixelsData)
 @:allow(hxPixels.Pixels)
 private class PixelsData
 {
+	inline static public var BYTES_PER_PIXEL:Int = 4;
+	
 	/** Total number of pixels. */
 	public var count(default, null):Int;
 	
@@ -277,12 +266,14 @@ private class PixelsData
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
+	 * 
+	 * `format` defaults to ARGB.
 	 */
 	public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null)
 	{
-		if (alloc) bytes = Bytes.alloc(this.count << 2);
-		
 		this.count = width * height;
+		
+		if (alloc) bytes = Bytes.alloc(this.count << 2);
 		
 		this.width = width;
 		this.height = height;
@@ -300,8 +291,8 @@ class ColorFormat {
 	var name:String;
 	
 	static function __init__():Void {
-		ARGB = new ColorFormat(CHANNEL_0, CHANNEL_1, CHANNEL_2, CHANNEL_3, "ARGB");
-		RGBA = new ColorFormat(CHANNEL_3, CHANNEL_0, CHANNEL_1, CHANNEL_2, "RGBA");
+		ARGB = new ColorFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
+		RGBA = new ColorFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
 	}
 	
 	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "ColorFormat"):Void {
@@ -335,10 +326,10 @@ class ColorFormat {
 }
 
 @:enum abstract Channel(Int) to Int {
-	var CHANNEL_0 = 0;
-	var CHANNEL_1 = 1;
-	var CHANNEL_2 = 2;
-	var CHANNEL_3 = 3;
+	var CH_0 = 0;
+	var CH_1 = 1;
+	var CH_2 = 2;
+	var CH_3 = 3;
 	
 	@:op(A + B) static function add(a:Int, b:Channel):Int;
 }
@@ -402,7 +393,7 @@ class Converter
 #if java
 
 	/** Converts `inImage` into a new image of `imageType` format. */
-	static public function convert(inImage:java.awt.image.BufferedImage, imageType:Int):java.awt.image.BufferedImage
+	static public function convertBufferedImage(inImage:java.awt.image.BufferedImage, imageType:Int):java.awt.image.BufferedImage
 	{
 		var outImage = new java.awt.image.BufferedImage(inImage.getWidth(), inImage.getHeight(), imageType);
 		var g2d = outImage.createGraphics();
