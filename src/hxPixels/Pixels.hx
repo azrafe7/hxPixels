@@ -7,7 +7,7 @@ import haxe.io.Bytes;
  * Class abstracting pixels for various libs/targets (for easier manipulation).
  * 
  * The exposed get/set methods will transparently work in ARGB format, while
- * the underlying bytes' color format will be automatically inferenced when one 
+ * the underlying bytes' pixel format will be automatically inferenced when one 
  * of the `from_` methods is called.
  * 
  * You can still override the channel mapping by setting `format` afterwards.
@@ -99,7 +99,7 @@ abstract Pixels(PixelsData)
 
 	@:from static public function fromFlambeTexture(texture:flambe.display.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, false);
-		pixels.format = ColorFormat.RGBA;
+		pixels.format = PixelFormat.RGBA;
 		
 		pixels.bytes = texture.readPixels(0, 0, texture.width, texture.height);
 		
@@ -118,7 +118,7 @@ abstract Pixels(PixelsData)
 	
 	@:from static public function fromSnowTexture(texture:phoenix.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, true);
-		pixels.format = ColorFormat.RGBA;
+		pixels.format = PixelFormat.RGBA;
 		
 		var data:snow.utils.UInt8Array = texture.asset.image.data;
 		
@@ -145,7 +145,7 @@ abstract Pixels(PixelsData)
 	#if js	
 	
 		var pixels = new Pixels(bmd.width, bmd.height);
-		pixels.format = ColorFormat.ARGB;
+		pixels.format = PixelFormat.ARGB;
 		
 		// this seems faster than other alternatives using getPixels/getVector
 		for (y in 0...pixels.height) {
@@ -157,7 +157,7 @@ abstract Pixels(PixelsData)
 	#else
 		
 		var pixels = new Pixels(bmd.width, bmd.height, false);
-		pixels.format = ColorFormat.ARGB;
+		pixels.format = PixelFormat.ARGB;
 		
 		var ba = bmd.getPixels(bmd.rect);
 		
@@ -204,7 +204,7 @@ abstract Pixels(PixelsData)
 
 	@:from static public function fromBufferedImage(image:java.awt.image.BufferedImage) {
 		var pixels = new Pixels(image.getWidth(), image.getHeight(), true);
-		pixels.format = ColorFormat.RGBA;
+		pixels.format = PixelFormat.RGBA;
 		
 		var buffer = new java.NativeArray<Int>(pixels.bytes.length);
 		buffer = image.getRaster().getPixels(0, 0, pixels.width, pixels.height, buffer);
@@ -229,7 +229,7 @@ abstract Pixels(PixelsData)
 
 	@:from static public function fromImageData(image:js.html.ImageData) {
 		var pixels = new Pixels(image.width, image.height, true);
-		pixels.format = ColorFormat.ARGB;
+		pixels.format = PixelFormat.ARGB;
 		
 		var data = image.data;
 		
@@ -251,7 +251,7 @@ private class PixelsData
 	/** Total number of pixels. */
 	public var count(default, null):Int;
 	
-	/** Bytes representing the pixels (in `format` color format). */
+	/** Bytes representing the pixels (in `format` pixel format). */
 	public var bytes(default, null):Bytes;
 	
 	/** Width of the source image. */
@@ -261,7 +261,7 @@ private class PixelsData
 	public var height(default, null):Int;
 	
 	/** Internal pixel format. */
-	public var format:ColorFormat;
+	public var format:PixelFormat;
 	
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
@@ -269,7 +269,7 @@ private class PixelsData
 	 * 
 	 * `format` defaults to ARGB.
 	 */
-	public function new(width:Int, height:Int, alloc:Bool = true, format:ColorFormat = null)
+	public function new(width:Int, height:Int, alloc:Bool = true, format:PixelFormat = null)
 	{
 		this.count = width * height;
 		
@@ -277,25 +277,25 @@ private class PixelsData
 		
 		this.width = width;
 		this.height = height;
-		this.format = format != null ? format : ColorFormat.ARGB;
+		this.format = format != null ? format : PixelFormat.ARGB;
 	}
 }
 
-class ColorFormat {
+class PixelFormat {
 	
-	static public var ARGB(default, null):ColorFormat;
-	static public var RGBA(default, null):ColorFormat;
+	static public var ARGB(default, null):PixelFormat;
+	static public var RGBA(default, null):PixelFormat;
 	
 	public var channelMap(default, null):Array<Channel>;
 	
 	var name:String;
 	
 	static function __init__():Void {
-		ARGB = new ColorFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
-		RGBA = new ColorFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
+		ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
+		RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
 	}
 	
-	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "ColorFormat"):Void {
+	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
 		this.channelMap = [a, r, g, b];
 		this.name = name;
 	}
