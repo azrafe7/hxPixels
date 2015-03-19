@@ -3,8 +3,8 @@ package ;
 import haxe.Timer;
 import hxPixels.Pixels;
 import java.lang.System;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import java.javax.swing.JFrame;
+import java.javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -12,7 +12,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import javax.swing.ImageIcon;
+import java.javax.swing.ImageIcon;
 import java.awt.event.*;
  
 class JavaAbstractPixelsDemo extends JFrame implements KeyListener {
