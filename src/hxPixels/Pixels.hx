@@ -120,7 +120,7 @@ abstract Pixels(PixelsData)
 		var pixels = new Pixels(texture.width, texture.height, true);
 		pixels.format = PixelFormat.RGBA;
 		
-		var data:snow.utils.UInt8Array = texture.asset.image.data;
+		var data:snow.io.typedarray.Uint8Array = texture.asset.image.data;
 		
 		for (i in 0...pixels.bytes.length) {
 			pixels.bytes.set(i, data[i]);
@@ -130,7 +130,7 @@ abstract Pixels(PixelsData)
 	}
 	
 	public function applyToSnowTexture(texture:phoenix.Texture) {
-		var data:snow.utils.UInt8Array = texture.asset.image.data;
+		var data:snow.io.typedarray.Uint8Array = texture.asset.image.data;
 		
 		for (i in 0...this.bytes.length) {
 			data[i] = this.bytes.get(i);

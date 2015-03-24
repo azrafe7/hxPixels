@@ -5,7 +5,6 @@ import luxe.Vector;
 import luxe.Sprite;
 import luxe.Color;
 import phoenix.Texture;
-import snow.utils.UInt8Array;
 import hxPixels.Pixels;
 
 class LuxeAbstractPixelsDemo extends luxe.Game {
