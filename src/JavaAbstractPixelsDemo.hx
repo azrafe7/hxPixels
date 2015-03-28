@@ -51,6 +51,9 @@ class JavaAbstractPixelsDemo extends JFrame implements KeyListener {
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
+		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
+		// then there's something wrong with the Pixels impl.
+		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
 		trace("set", Timer.stamp() - startTime);
 		
 		// apply the modified pixels back to image
@@ -59,8 +62,8 @@ class JavaAbstractPixelsDemo extends JFrame implements KeyListener {
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info
-		trace("pixels", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(300, 300)));
-		trace("image ", image.getWidth(), image.getHeight(), image.getWidth() * image.getHeight(), StringTools.hex(image.getRGB(300, 300)));
+		trace("pixels", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
+		trace("image ", image.getWidth(), image.getHeight(), image.getWidth() * image.getHeight(), StringTools.hex(image.getRGB(100, 100)));
 		
         
 		setVisible(true);

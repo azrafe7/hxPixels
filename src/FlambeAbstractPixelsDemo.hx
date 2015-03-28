@@ -22,7 +22,10 @@ class FlambeAbstractPixelsDemo
         // Wind up all platform-specific stuff
         System.init();
 
-        // Load up the compiled pack in the assets directory named "global"
+        // Catch uncaught exceptions
+		System.uncaughtError.connect(log);
+		
+		// Load up the compiled pack in the assets directory named "global"
         var manifest = Manifest.fromAssets("global");
         var loader = System.loadAssetPack(manifest);
         loader.get(onSuccess);
@@ -30,10 +33,6 @@ class FlambeAbstractPixelsDemo
 
     private static function onSuccess (pack :AssetPack)
     {
-        // Add a solid color background
-        var background = new FillSprite(0xffffff, System.stage.width, System.stage.height).setXY(0, 0);
-        System.root.addChild(new Entity().add(background));
-
         var texture:Texture = pack.getTexture("galapagosColor");
 		
 		// show the sprite
@@ -49,13 +48,16 @@ class FlambeAbstractPixelsDemo
 		var bitmapData = new GalapagosColor(0, 0);
 		var pixels:Pixels = bitmapData;
 	#end
-		log("load " + (Timer.stamp() - startTime));
+		log("load " + (Timer.stamp() - startTime) + "  " + pixels.width + "x" + pixels.height);
 		
 		// add random red points
 		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
+		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
+		// then there's something wrong with the Pixels impl.
+		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
 		log("set " + (Timer.stamp() - startTime));
 		
 		// apply the modified pixels back to texture

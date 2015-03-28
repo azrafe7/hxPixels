@@ -45,6 +45,9 @@ class AbstractPixelsDemo extends Sprite {
 		for (i in 0...10000) {
 			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
 		}
+		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
+		// then there's something wrong with the Pixels impl.
+		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
 		trace("set", Timer.stamp() - startTime);
 		
 		// apply the modified pixels back to bitmapData
@@ -53,8 +56,8 @@ class AbstractPixelsDemo extends Sprite {
 		trace("apply", Timer.stamp() - startTime);
 		
 		// trace info
-		trace("pixels    ", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(300, 300)));
-		trace("bitmapData", bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(300, 300)));
+		trace("pixels    ", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
+		trace("bitmapData", bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(100, 100)));
 		
 		
 		// click/drag

@@ -38,10 +38,13 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 			pixels.setPixel32(Std.int(Math.random() * texture.width), Std.int(Math.random() * texture.height), 
 							  0xFF000000 | color);
 		}
+		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
+		// then there's something wrong with the Pixels impl.
+		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
 		trace("set " + (Timer.stamp() - start));
 		
 		start = Timer.stamp();
-		pixels.applyToSnowTexture(texture);
+		pixels.applyToLuxeTexture(texture);
 		trace("apply " + (Timer.stamp() - start));
 	}
 	

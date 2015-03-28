@@ -16,14 +16,13 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="c:\HaxeToolkit\haxe\luxe\git" />
-    <class path="c:\HaxeToolkit\haxe\hxcpp\3,2,27" />
     <class path="c:\HaxeToolkit\haxe\snow\git" />
     <class path="src" />
-    <class path="bin\luxe\windows.build\haxe" />
+    <class path="bin\luxe\web.build\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="no-compilation&#xA;windows&#xA;arch-32&#xA;desktop&#xA;hxcpp_static_std&#xA;snow_audio_openal&#xA;snow_input_sdl&#xA;snow_window_sdl&#xA;luxe_native&#xA;parcel_thread_disabled&#xA;snow_native&#xA;luxe&#xA;hxcpp&#xA;snow" />
+    <option directives="no-compilation&#xA;web&#xA;arch-web&#xA;source-map-content&#xA;hxcpp_static_std&#xA;snow_audio_howlerjs&#xA;luxe_web&#xA;snow_web&#xA;luxe&#xA;snow" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="LuxeApp" />
