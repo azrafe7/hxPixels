@@ -21,7 +21,7 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		
         texture.filter = FilterType.nearest;
 
-		$type(texture.asset.image.data);
+		$type(texture.asset.image.pixels);
 		
         var sprite = new Sprite({
             texture: texture,

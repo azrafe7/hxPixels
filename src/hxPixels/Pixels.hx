@@ -121,7 +121,7 @@ abstract Pixels(PixelsData)
 		pixels.format = PixelFormat.RGBA;
 		
 		var pot_w = texture.width_actual;
-		var data:snow.io.typedarray.Uint8Array = texture.asset.image.data;
+		var data:snow.api.buffers.Uint8Array = texture.asset.image.pixels;
 		
 		var i = 0;
 		for (y in 0...pixels.height) {
@@ -140,7 +140,7 @@ abstract Pixels(PixelsData)
 	public function applyToLuxeTexture(texture:phoenix.Texture) {
 		
 		var pot_w = texture.width_actual;
-		var data:snow.io.typedarray.Uint8Array = texture.asset.image.data;
+		var data:snow.api.buffers.Uint8Array = texture.asset.image.pixels;
 		
 		var i = 0;
 		for (y in 0...this.height) {
