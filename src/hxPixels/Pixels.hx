@@ -114,45 +114,45 @@ abstract Pixels(PixelsData)
 
 #end
 
-#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format (and must account for power_of_two sizes)
+#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format (and must account for power_of_two sizes when submitting)
 	
 	@:from static public function fromLuxeTexture(texture:phoenix.Texture) {
-		var pixels = new Pixels(texture.width, texture.height, true);
+		var pixels = new Pixels(texture.width, texture.height, false);
 		pixels.format = PixelFormat.RGBA;
 		
-		var pot_w = texture.width_actual;
-		var data:snow.api.buffers.Uint8Array = texture.asset.image.pixels;
+		var data = new snow.api.buffers.Uint8Array(texture.width * texture.height * 4);
+		texture.fetch(data);
+		pixels.bytes = data.toBytes();
 		
-		var i = 0;
-		for (y in 0...pixels.height) {
-			for (x in 0...pixels.width) {
-				var pos:Int = (x << 2) + (y << 2) * pot_w;
-				pixels.bytes.set(i++, data[pos + 0]);
-				pixels.bytes.set(i++, data[pos + 1]);
-				pixels.bytes.set(i++, data[pos + 2]);
-				pixels.bytes.set(i++, data[pos + 3]);
-			}
+		return pixels;
+	}
+	
+	@:from static public function fromLuxeAssetImage(assetImage:snow.types.Types.AssetImage) {
+		var image:snow.types.Types.ImageInfo = assetImage.image;
+		var pixels = new Pixels(image.width, image.height, true);
+		pixels.format = PixelFormat.RGBA;
+		
+		var data = image.pixels.toBytes();
+		var stride = image.width * 4;
+		
+		for (y in 0...image.height) {
+			pixels.bytes.blit(y * stride, data, y * image.width_actual * 4, stride);
 		}
 		
 		return pixels;
 	}
 	
 	public function applyToLuxeTexture(texture:phoenix.Texture) {
+		var data = Bytes.alloc(texture.width_actual * texture.height_actual * 4);
 		
-		var pot_w = texture.width_actual;
-		var data:snow.api.buffers.Uint8Array = texture.asset.image.pixels;
+		var pot_width = texture.width_actual;
+		var stride = this.width * 4;
 		
-		var i = 0;
 		for (y in 0...this.height) {
-			for (x in 0...this.width) {
-				var pos:Int = (x << 2) + (y << 2) * pot_w;
-				data[pos + 0] = this.bytes.get(i++);
-				data[pos + 1] = this.bytes.get(i++);
-				data[pos + 2] = this.bytes.get(i++);
-				data[pos + 3] = this.bytes.get(i++);
-			}
+			data.blit(y * stride, this.bytes, y * pot_width * 4, stride);
 		}
-		texture.reset();  // rebind texture
+		
+		texture.submit(snow.api.buffers.Uint8Array.fromBytes(data));  // rebind texture
 	}
 #end
 

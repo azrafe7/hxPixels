@@ -1,27 +1,28 @@
 
 import haxe.Timer;
-import luxe.Input;
-import luxe.Vector;
-import luxe.Sprite;
-import luxe.Color;
-import phoenix.Texture;
 import hxPixels.Pixels;
+import luxe.Input.Key;
+import luxe.Input.KeyEvent;
+import luxe.Sprite;
+import phoenix.Texture;
+import snow.types.Types.AssetImage;
 
 class LuxeAbstractPixelsDemo extends luxe.Game {
 
-	var texture:Texture;
+	static var assetId:String = "assets/global/galapagosColor.png";
+	
+	var assetImage:AssetImage;
 	
     override function ready() {
-		texture = Luxe.loadTexture("assets/global/galapagosColor.png");
-		
-		texture.onload = onLoaded;
+		Luxe.snow.assets.image(assetId).then(function (_assetImage:AssetImage):Void {
+			assetImage = _assetImage;
+			Luxe.resources.load_texture(assetId).then(onLoaded);
+		});
     } //ready
 
-	function onLoaded(_):Void {
+	function onLoaded(texture:Texture):Void {
 		
-        texture.filter = FilterType.nearest;
-
-		$type(texture.asset.image.pixels);
+		$type(texture);
 		
         var sprite = new Sprite({
             texture: texture,
@@ -29,9 +30,8 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
         });
 		
 		var start = Timer.stamp();
-		var pixels:Pixels = texture;
+		var pixels:Pixels = Pixels.fromLuxeAssetImage(assetImage);
 		trace("load " + (Timer.stamp() - start));
-		
 		start = Timer.stamp();
 		for (i in 0...10000) {
 			var color = 0xFF0000;
