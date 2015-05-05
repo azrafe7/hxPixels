@@ -74,10 +74,22 @@ class AbstractPixelsDemo extends Sprite {
 		var pixels:Pixels = bitmapData;
 		trace('load        ${Timer.stamp() - startTime}');
 		
+		// generate random points
+		var points = [];
+		var NUM_POINTS = 10000;
+		for (i in 0...NUM_POINTS) points.push( { x: Std.int(Math.random() * pixels.width), y: Std.int(Math.random() * pixels.height) } );
+		
+		// read random points
+		startTime = Timer.stamp();
+		for (i in 0...NUM_POINTS) {
+			var color = pixels.getPixel32(points[i].x, points[i].y);
+		}
+		trace('get         ${Timer.stamp() - startTime}');
+		
 		// add random red points
 		startTime = Timer.stamp();
-		for (i in 0...10000) {
-			pixels.setPixel32(Std.int(Math.random() * pixels.width), Std.int(Math.random() * pixels.height), 0xFFFF0000);
+		for (i in 0...NUM_POINTS) {
+			pixels.setPixel32(points[i].x, points[i].y, 0xFFFF0000);
 		}
 		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
 		// then there's something wrong with the Pixels impl.
