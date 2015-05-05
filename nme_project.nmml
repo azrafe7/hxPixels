@@ -15,4 +15,5 @@
 	<!--haxeflag name="--no-traces" if="release" /-->
 	<haxelib name="nme" />
 	
+	<assets path="assets" />
 </project>
