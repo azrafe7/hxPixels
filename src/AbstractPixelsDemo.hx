@@ -16,6 +16,11 @@ class GalapagosColor extends flash.display.BitmapData {}
 
 class AbstractPixelsDemo extends Sprite {
 
+	var assets:Array<String> = [
+		"assets/global/galapagosColor.png",
+		"assets/global/FromBitmap.png"
+	];
+	
 	public static function main(): Void {
 		Lib.current.addChild(new AbstractPixelsDemo());
 	}
@@ -23,22 +28,26 @@ class AbstractPixelsDemo extends Sprite {
 	public function new() {
 		super();
 		
-		var bitmapData:BitmapData = null;
-		
-    #if html5	// load as openfl asset
-        bitmapData = openfl.Assets.getBitmapData("GalapagosColor");
-    #else		
-        bitmapData = new GalapagosColor(0, 0);	
-	#end
+		for (asset in assets) {
+			var bmd = openfl.Assets.getBitmapData(asset);
+			test(bmd, asset);
+		}
+	}
 	
+	public function test(bitmapData:BitmapData, id:String):Void {
+		
 		// show the image bmp
 		var bitmap:Bitmap = new Bitmap(bitmapData);
 		addChild(bitmap);
+		bitmap.x = (Lib.current.stage.stageWidth - bitmap.width) / 2;
+		bitmap.y = (Lib.current.stage.stageHeight - bitmap.height) / 2;
+		
+		trace('[ testing $id ]');
 		
 		// load bitmapData into pixels abstract
 		var startTime = Timer.stamp();
 		var pixels:Pixels = bitmapData;
-		trace("load", Timer.stamp() - startTime);
+		trace('load        ${Timer.stamp() - startTime}');
 		
 		// add random red points
 		startTime = Timer.stamp();
@@ -48,38 +57,20 @@ class AbstractPixelsDemo extends Sprite {
 		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
 		// then there's something wrong with the Pixels impl.
 		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
-		trace("set", Timer.stamp() - startTime);
+		trace('set         ${Timer.stamp() - startTime}');
 		
 		// apply the modified pixels back to bitmapData
 		startTime = Timer.stamp();
 		pixels.applyToBitmapData(bitmapData);
-		trace("apply", Timer.stamp() - startTime);
+		trace('apply       ${Timer.stamp() - startTime}');
 		
 		// trace info
-		trace("pixels    ", pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
-		trace("bitmapData", bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(100, 100)));
-		
-		
-		// click/drag
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		
-		// animate
-		Lib.current.stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		trace("pixels      " + pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
+		trace("bitmapData  " + bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(100, 100)) + "\n");
 		
 		// key presses
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		
 	}
-	
-    function onMouseUp( event: MouseEvent ): Void {
-    }
-    
-    function onMouseDown( event: MouseEvent ): Void {
-    }
-    
-    function onEnterFrame( event: Event ): Void {
-    }
 	
 	function onKeyDown(event:KeyboardEvent):Void
 	{

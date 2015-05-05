@@ -16,5 +16,5 @@
 	<!--haxeflag name="--no-traces" if="release" /-->
 	<haxelib name="openfl" />
 	
-	<assets path="assets/global/galapagosColor.png" rename="GalapagosColor" if="html5" />
+	<assets path="assets" />
 </project>

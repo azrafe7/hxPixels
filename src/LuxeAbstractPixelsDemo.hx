@@ -5,34 +5,54 @@ import luxe.Input.Key;
 import luxe.Input.KeyEvent;
 import luxe.Sprite;
 import phoenix.Texture;
+import snow.api.Promise;
 import snow.types.Types.AssetImage;
 
 class LuxeAbstractPixelsDemo extends luxe.Game {
 
-	static var assetId:String = "assets/global/galapagosColor.png";
-	
-	var assetImage:AssetImage;
+	var assets:Array<String> = [
+		"assets/global/galapagosColor.png",
+		"assets/global/FromBitmap.png"
+	];
 	
     override function ready() {
-		Luxe.snow.assets.image(assetId).then(function (_assetImage:AssetImage):Void {
-			assetImage = _assetImage;
-			Luxe.resources.load_texture(assetId).then(onLoaded);
-		});
+		
+		var z = 0;
+		
+		for (asset in assets) {
+			
+			var assetImage:AssetImage;
+			var texture:Texture;
+			
+			var promisedAsset = Luxe.snow.assets.image(asset).then(function (_assetImage):Void {
+				assetImage = _assetImage;
+			});
+			
+			var promisedTexture = Luxe.resources.load_texture(asset).then(function (_texture):Void {
+				texture = _texture;
+			});
+			
+			Promise.all([promisedAsset, promisedTexture]).then(function (_):Void {
+				test(texture, assetImage, asset, z--);
+			});
+		}
     } //ready
 
-	function onLoaded(texture:Texture):Void {
-		
-		$type(texture);
+	function test(texture:Texture, assetImage:AssetImage, id:String, z:Int):Void {
 		
         var sprite = new Sprite({
             texture: texture,
-			pos: Luxe.screen.mid
+			pos: Luxe.screen.mid,
+			depth: z
         });
 		
-		var start = Timer.stamp();
+		trace('[ testing $id ]');
+		
+		var startTime = Timer.stamp();
 		var pixels:Pixels = Pixels.fromLuxeAssetImage(assetImage);
-		trace("load " + (Timer.stamp() - start));
-		start = Timer.stamp();
+		trace('load        ${Timer.stamp() - startTime}');
+		
+		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			var color = 0xFF0000;
 			pixels.setPixel32(Std.int(Math.random() * texture.width), Std.int(Math.random() * texture.height), 
@@ -41,11 +61,11 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		// if this green line doesn't go _exactly_ from top-left to bottom-right, 
 		// then there's something wrong with the Pixels impl.
 		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
-		trace("set " + (Timer.stamp() - start));
+		trace('set         ${Timer.stamp() - startTime}');
 		
-		start = Timer.stamp();
+		startTime = Timer.stamp();
 		pixels.applyToLuxeTexture(texture);
-		trace("apply " + (Timer.stamp() - start));
+		trace('apply       ${Timer.stamp() - startTime}\n');
 	}
 	
 	override function onkeyup( e:KeyEvent ) {
