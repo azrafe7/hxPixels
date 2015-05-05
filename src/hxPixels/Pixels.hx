@@ -161,15 +161,17 @@ abstract Pixels(PixelsData)
 	@:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
 	#if js	
 	
-		var pixels = new Pixels(bmd.width, bmd.height);
-		pixels.format = PixelFormat.ARGB;
+		var pixels = new Pixels(bmd.width, bmd.height, false);
+		pixels.format = PixelFormat.RGBA;
 		
-		// this seems faster than other alternatives using getPixels/getVector
-		for (y in 0...pixels.height) {
-			for (x in 0...pixels.width) {
-				pixels.setPixel32(x, y, bmd.getPixel32(x, y));
-			}
-		}
+		// force buffer creation
+		var image = @:privateAccess bmd.__image;
+		lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
+		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
+
+		var data = @:privateAccess bmd.__image.buffer.data;
+		//for (i in 0...pixels.width * pixels.height * 4) pixels.bytes.set(i, data[i]);
+		pixels.bytes = Bytes.ofData(data.buffer);
 		
 	#else
 		
@@ -192,11 +194,11 @@ abstract Pixels(PixelsData)
 	public function applyToBitmapData(bmd:flash.display.BitmapData) {
 	#if js
 		
-		for (y in 0...this.height) {
-			for (x in 0...this.width) {
-				bmd.setPixel32(x, y, getPixel32(x, y));
-			}
-		}
+		var image = @:privateAccess bmd.__image;
+		var data = @:privateAccess bmd.__image.buffer.data;
+		for (i in 0...this.width * this.height * 4) data[i] = this.bytes.get(i);
+		image.dirty = true;
+		lime.graphics.utils.ImageCanvasUtil.sync(image);
 		
 	#else
 	
