@@ -149,7 +149,7 @@ abstract Pixels(PixelsData)
 		var stride = this.width * 4;
 		
 		for (y in 0...this.height) {
-			data.blit(y * stride, this.bytes, y * pot_width * 4, stride);
+			data.blit(y * pot_width * 4, this.bytes, y * stride, stride);
 		}
 		
 		texture.submit(snow.api.buffers.Uint8Array.fromBytes(data));  // rebind texture
