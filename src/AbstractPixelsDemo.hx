@@ -11,8 +11,28 @@ import flash.Lib;
 import haxe.Timer;
 import hxPixels.Pixels;
 
+#if !openfl
 @:bitmap("assets/global/galapagosColor.png")
-class GalapagosColor extends flash.display.BitmapData {}
+class Asset1 extends flash.display.BitmapData {}
+
+@:bitmap("assets/global/FromBitmap.png")
+class Asset2 extends flash.display.BitmapData {}
+
+class Assets {
+	
+	static var assets:Map<String, BitmapData>;
+	
+	static function __init__():Void {
+		assets = new Map();
+		assets["assets/global/galapagosColor.png"] = new Asset1(0, 0);
+		assets["assets/global/FromBitmap.png"] = new Asset2(0, 0);
+	}
+	
+	static public function get(id:String):BitmapData {
+		return assets[id];
+	}
+}
+#end
 
 class AbstractPixelsDemo extends Sprite {
 
@@ -20,6 +40,7 @@ class AbstractPixelsDemo extends Sprite {
 		"assets/global/galapagosColor.png",
 		"assets/global/FromBitmap.png"
 	];
+	
 	
 	public static function main(): Void {
 		Lib.current.addChild(new AbstractPixelsDemo());
@@ -29,7 +50,11 @@ class AbstractPixelsDemo extends Sprite {
 		super();
 		
 		for (asset in assets) {
+		#if openfl
 			var bmd = openfl.Assets.getBitmapData(asset);
+		#else
+			var bmd = Assets.get(asset);
+		#end
 			test(bmd, asset);
 		}
 	}
