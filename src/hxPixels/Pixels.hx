@@ -161,15 +161,16 @@ abstract Pixels(PixelsData)
 	@:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
 	#if js	
 	
-		var pixels = new Pixels(bmd.width, bmd.height);
-		pixels.format = PixelFormat.ARGB;
+		var pixels = new Pixels(bmd.width, bmd.height, false);
+		pixels.format = PixelFormat.RGBA;
 		
-		// this seems faster than other alternatives using getPixels/getVector
-		for (y in 0...pixels.height) {
-			for (x in 0...pixels.width) {
-				pixels.setPixel32(x, y, bmd.getPixel32(x, y));
-			}
-		}
+		// force buffer creation
+		var image = @:privateAccess bmd.__image;
+		lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
+		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
+
+		var data = @:privateAccess bmd.__image.buffer.data;
+		pixels.bytes = Bytes.ofData(data.buffer);
 		
 	#else
 		
@@ -192,21 +193,17 @@ abstract Pixels(PixelsData)
 	public function applyToBitmapData(bmd:flash.display.BitmapData) {
 	#if js
 		
-		for (y in 0...this.height) {
-			for (x in 0...this.width) {
-				bmd.setPixel32(x, y, getPixel32(x, y));
-			}
-		}
+		var image = @:privateAccess bmd.__image;
+		image.dirty = true;
+		lime.graphics.utils.ImageCanvasUtil.sync(image);
 		
 	#else
 	
-		var ba = bmd.getPixels(bmd.rect);
-		
-		#if (openfl && !flash)
-			ba.blit(0, this.bytes, 0, this.bytes.length);
+		#if flash
+			var ba = this.bytes.getData();
+			ba.endian = flash.utils.Endian.BIG_ENDIAN;
 		#else
-			ba.position = 0;
-			ba.writeBytes(this.bytes.getData());
+			var ba = openfl.utils.ByteArray.fromBytes(this.bytes);
 		#end
 		
 		ba.position = 0;
@@ -302,6 +299,7 @@ class PixelFormat {
 	
 	static public var ARGB(default, null):PixelFormat;
 	static public var RGBA(default, null):PixelFormat;
+	static public var BGRA(default, null):PixelFormat;
 	
 	public var channelMap(default, null):Array<Channel>;
 	
@@ -310,6 +308,8 @@ class PixelFormat {
 	static function __init__():Void {
 		ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
 		RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
+		BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
+		AGRB = new PixelFormat(CH_0, CH_2, CH_1, CH_3, "AGRB");
 	}
 	
 	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
