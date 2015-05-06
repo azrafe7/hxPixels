@@ -170,7 +170,6 @@ abstract Pixels(PixelsData)
 		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
 
 		var data = @:privateAccess bmd.__image.buffer.data;
-		//for (i in 0...pixels.width * pixels.height * 4) pixels.bytes.set(i, data[i]);
 		pixels.bytes = Bytes.ofData(data.buffer);
 		
 	#else
@@ -195,20 +194,16 @@ abstract Pixels(PixelsData)
 	#if js
 		
 		var image = @:privateAccess bmd.__image;
-		var data = @:privateAccess bmd.__image.buffer.data;
-		for (i in 0...this.width * this.height * 4) data[i] = this.bytes.get(i);
 		image.dirty = true;
 		lime.graphics.utils.ImageCanvasUtil.sync(image);
 		
 	#else
 	
-		var ba = bmd.getPixels(bmd.rect);
-		
-		#if (openfl && !flash)
-			ba.blit(0, this.bytes, 0, this.bytes.length);
+		#if flash
+			var ba = this.bytes.getData();
+			ba.endian = flash.utils.Endian.BIG_ENDIAN;
 		#else
-			ba.position = 0;
-			ba.writeBytes(this.bytes.getData());
+			var ba = openfl.utils.ByteArray.fromBytes(this.bytes);
 		#end
 		
 		ba.position = 0;
@@ -304,6 +299,7 @@ class PixelFormat {
 	
 	static public var ARGB(default, null):PixelFormat;
 	static public var RGBA(default, null):PixelFormat;
+	static public var BGRA(default, null):PixelFormat;
 	
 	public var channelMap(default, null):Array<Channel>;
 	
@@ -312,6 +308,8 @@ class PixelFormat {
 	static function __init__():Void {
 		ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
 		RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
+		BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
+		AGRB = new PixelFormat(CH_0, CH_2, CH_1, CH_3, "AGRB");
 	}
 	
 	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
