@@ -309,7 +309,6 @@ class PixelFormat {
 		ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
 		RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
 		BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
-		AGRB = new PixelFormat(CH_0, CH_2, CH_1, CH_3, "AGRB");
 	}
 	
 	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
