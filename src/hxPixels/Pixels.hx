@@ -29,6 +29,7 @@ abstract Pixels(PixelsData)
 	}
 	
 	/** Byte value at `i` position, as if the data were in ARGB format. */
+	@:arrayAccess
 	inline public function getByte(i:Int) {
 		return this.bytes.get((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK]);
 	}
@@ -57,6 +58,7 @@ abstract Pixels(PixelsData)
 	}
 	
 	/** Sets the byte value at `i` pos, as if the data were in ARGB format. */
+	@:arrayAccess
 	inline public function setByte(i:Int, value:Int) {
 		this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
 	}
