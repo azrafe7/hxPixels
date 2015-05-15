@@ -116,7 +116,7 @@ abstract Pixels(PixelsData)
 
 #end
 
-#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format (and must account for power_of_two sizes when submitting)
+#if (snow || luxe) // in snow/luxe texture bytes are in RGBA format (and must account for padded sizes when submitting)
 	
 	@:from static public function fromLuxeTexture(texture:phoenix.Texture) {
 		var pixels = new Pixels(texture.width, texture.height, false);
@@ -147,11 +147,11 @@ abstract Pixels(PixelsData)
 	public function applyToLuxeTexture(texture:phoenix.Texture) {
 		var data = Bytes.alloc(texture.width_actual * texture.height_actual * 4);
 		
-		var pot_width = texture.width_actual;
+		var padded_width = texture.width_actual;
 		var stride = this.width * 4;
 		
 		for (y in 0...this.height) {
-			data.blit(y * pot_width * 4, this.bytes, y * stride, stride);
+			data.blit(y * padded_width * 4, this.bytes, y * stride, stride);
 		}
 		
 		texture.submit(snow.api.buffers.Uint8Array.fromBytes(data));  // rebind texture
