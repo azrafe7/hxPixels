@@ -91,6 +91,21 @@ abstract Pixels(PixelsData)
 		this.bytes.set((pos + this.format.B), b);
 	}
 	
+	/** Fills the specified rect area, with `value` expressed in ARGB format. Doesn't do any bound checking. */
+	public function fillRect(x:Int, y:Int, width:Int, height:Int, value:Int):Void {
+		var pos = (y * this.width + x) << 2;
+		
+		var stridePixels = new Pixels(width, 1, true);
+		stridePixels.format = this.format;
+		var stride = width << 2;
+		
+		for (x in 0...width) stridePixels.setPixel32(x, 0, value);
+		for (y in 0...height) {
+			this.bytes.blit(pos, stridePixels.bytes, 0, stride);
+			pos += this.width << 2;
+		}		
+	}
+	
 	public function clone():Pixels {
 		var clone:Pixels = new Pixels(this.width, this.height, true);
 		clone.bytes.blit(0, this.bytes, 0, this.bytes.length);
