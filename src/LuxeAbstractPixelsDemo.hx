@@ -21,19 +21,11 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		
 		for (asset in assets) {
 			
-			var assetImage:AssetImage;
-			var texture:Texture;
+			var promisedTexture = Luxe.resources.load_texture(asset);
+			var promisedAsset = Luxe.snow.assets.image(asset);
 			
-			var promisedAsset = Luxe.snow.assets.image(asset).then(function (_assetImage):Void {
-				assetImage = _assetImage;
-			});
-			
-			var promisedTexture = Luxe.resources.load_texture(asset).then(function (_texture):Void {
-				texture = _texture;
-			});
-			
-			Promise.all([promisedAsset, promisedTexture]).then(function (_):Void {
-				test(texture, assetImage, asset, z--);
+			Promise.all([promisedTexture, promisedAsset]).then(function (fulfilledArray):Void {
+				test(cast fulfilledArray[0], cast fulfilledArray[1], asset, z--);
 			});
 		}
     } //ready
