@@ -19,13 +19,37 @@ abstract Pixels(PixelsData)
 {
 	static inline var CHANNEL_MASK:Int = 3;
 	
+#if CACHE_Y
+	static var WIDTH_MUL:Array<Int> = [];
+#end
+
 	/** 
 	 * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
 	 * but the other properties (width, height, count) will still be set.
 	 */
-	inline public function new(width:Int, height:Int, alloc:Bool = true) 
+	public function new(width:Int, height:Int, alloc:Bool = true) 
 	{
 		this = new PixelsData(width, height, alloc);
+	#if CACHE_Y
+		var y = 0;
+		var len = WIDTH_MUL.length;
+		while (y < len) {
+			WIDTH_MUL[y] = y * width;
+			y++;
+		}
+		while (y < height) {
+			WIDTH_MUL.push(y * width);
+			y++;
+		}
+	#end
+	}
+	
+	inline function _widthMul(y:Int):Int {
+	#if CACHE_Y
+		return WIDTH_MUL[y];
+	#else
+		return y * this.width;
+	#end
 	}
 	
 	/** Byte value at `i` position, as if the data were in ARGB format. */
@@ -36,7 +60,7 @@ abstract Pixels(PixelsData)
 	
 	/** Pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
 	inline public function getPixel(x:Int, y:Int) {
-		var pos = (y * this.width + x) << 2;
+		var pos = (_widthMul(y) + x) << 2;
 		
 		var r = this.bytes.get(pos + this.format.R) << 16;
 		var g = this.bytes.get(pos + this.format.G) << 8;
@@ -47,7 +71,7 @@ abstract Pixels(PixelsData)
 	
 	/** Pixel value (with alpha) at `x`,`y`, as if the data were in ARGB format. */
 	inline public function getPixel32(x:Int, y:Int) {
-		var pos = (y * this.width + x) << 2;
+		var pos = (_widthMul(y) + x) << 2;
 		
 		var a = this.bytes.get(pos + this.format.A) << 24;
 		var r = this.bytes.get(pos + this.format.R) << 16;
@@ -65,7 +89,7 @@ abstract Pixels(PixelsData)
 	
 	/** Sets the pixel value (without alpha) at `x`,`y`, with `value` expressed in RGB format. */
 	inline public function setPixel(x:Int, y:Int, value:Int) {
-		var pos = (y * this.width + x) << 2;
+		var pos = (_widthMul(y) + x) << 2;
 		
 		var r = (value >> 16) & 0xFF;
 		var g = (value >> 8) & 0xFF;
@@ -78,7 +102,7 @@ abstract Pixels(PixelsData)
 	
 	/** Sets the pixel value (with alpha) at `x`,`y`, with `value` expressed in ARGB format. */
 	inline public function setPixel32(x:Int, y:Int, value:Int) {
-		var pos = (y * this.width + x) << 2;
+		var pos = (_widthMul(y) + x) << 2;
 		
 		var a = (value >> 24) & 0xFF;
 		var r = (value >> 16) & 0xFF;
@@ -93,7 +117,7 @@ abstract Pixels(PixelsData)
 	
 	/** Fills the specified rect area, with `value` expressed in ARGB format. Doesn't do any bound checking. */
 	public function fillRect(x:Int, y:Int, width:Int, height:Int, value:Int):Void {
-		var pos = (y * this.width + x) << 2;
+		var pos = (_widthMul(y) + x) << 2;
 		
 		var stridePixels = new Pixels(width, 1, true);
 		stridePixels.format = this.format;
