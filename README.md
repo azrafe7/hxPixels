@@ -14,8 +14,9 @@ For the supported libs the following methods are implemented (**note** that all 
  - `get`/`setPixel()`: get/set pixel value (without alpha) at `x`,`y`
  - `get`/`setByte()`: get/set byte value at `i`
  - `clone()`: make a duplicate of the `Pixels` instance
- - `.bytes`: access to the _raw_ underlying bytes
- - `.format`: change internal color mapping
+ - `fillRect()`: fill a rect area with pixel value (with alpha)
+ - `bytes`: access to the _raw_ underlying bytes (in source-specific format)
+ - `format`: change internal color mapping
  
 ### Supported classes/libs
 
@@ -27,7 +28,7 @@ For the supported libs the following methods are implemented (**note** that all 
  
 ### Implementation
 
-`Pixels` is an abstract over `haxe.io.Bytes` and stores the source-specific color format in the underlying `bytes`, auto-converting to ARGB when using get/set methods (see other branches for the inverse approach).
+`Pixels` is an abstract over `haxe.io.Bytes`. It stores the raw bytes in the underlying `bytes` var (in source-specific color format), auto-converting to ARGB when using get/set methods (see other branches for the inverse approach).
 
 ### Usage 
 <sup>See the [src folder](https://github.com/azrafe7/hxPixels/tree/master/src) for examples on how to use it, and file issues if you have problems or spot a bug.</sup>
