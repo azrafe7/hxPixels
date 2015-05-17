@@ -40,10 +40,24 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		
 		trace('[ testing $id ]');
 		
+		// load into pixels abstract
 		var startTime = Timer.stamp();
 		var pixels:Pixels = Pixels.fromLuxeAssetImage(assetImage);
 		trace('load        ${Timer.stamp() - startTime}');
 		
+		// generate random points
+		var points = [];
+		var NUM_POINTS = 10000;
+		for (i in 0...NUM_POINTS) points.push( { x: Std.int(Math.random() * pixels.width), y: Std.int(Math.random() * pixels.height) } );
+		
+		// read random points
+		startTime = Timer.stamp();
+		for (i in 0...NUM_POINTS) {
+			var color = pixels.getPixel32(points[i].x, points[i].y);
+		}
+		trace('get         ${Timer.stamp() - startTime}');
+		
+		// add random red points
 		startTime = Timer.stamp();
 		for (i in 0...10000) {
 			var color = 0xFF0000;
@@ -55,6 +69,7 @@ class LuxeAbstractPixelsDemo extends luxe.Game {
 		Bresenham.line(pixels, 0, 0, pixels.width - 1, pixels.height - 1, 0x00FF00);
 		trace('set         ${Timer.stamp() - startTime}');
 		
+		// apply the modified pixels back
 		startTime = Timer.stamp();
 		pixels.applyToLuxeTexture(texture);
 		trace('apply       ${Timer.stamp() - startTime}\n');
