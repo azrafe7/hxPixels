@@ -1,5 +1,4 @@
 -cp src/
--cp ../../src/
 -main AbstractPixelsDemo
 -swf-version 11.2
 -swf-header 1024:780:60:FFFFFF
