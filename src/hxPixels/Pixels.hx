@@ -246,8 +246,6 @@ abstract Pixels(PixelsData)
 	}
 	
 	public function applyToBufferedImage(image:java.awt.image.BufferedImage) {
-		var imageType = image.getType();
-		
 		var buffer = new java.NativeArray<Int>(this.bytes.length);
 		for (i in 0...buffer.length) buffer[i] = this.bytes.get(i);
 		
