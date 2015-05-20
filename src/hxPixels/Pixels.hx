@@ -185,7 +185,7 @@ abstract Pixels(PixelsData)
 		var image = @:privateAccess bmd.__image;
 		lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
 		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
-
+		
 		var data = @:privateAccess bmd.__image.buffer.data;
 		pixels.bytes = Bytes.ofData(data.buffer);
 		
@@ -211,8 +211,17 @@ abstract Pixels(PixelsData)
 	#if js
 		
 		var image = @:privateAccess bmd.__image;
-		image.dirty = true;
-		lime.graphics.utils.ImageCanvasUtil.sync(image);
+		
+		if (@:privateAccess image.buffer.__srcImageData == null) { // NOTE: find a way to speed this up
+			for (y in 0...this.height) {
+				for (x in 0...this.width) {
+					bmd.setPixel32(x, y, getPixel32(x, y));
+				}
+			}
+		} else {
+			image.dirty = true;
+			lime.graphics.utils.ImageCanvasUtil.sync(image);
+		}
 		
 	#else
 	
