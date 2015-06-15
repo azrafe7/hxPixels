@@ -12,6 +12,12 @@ import haxe.io.Bytes;
  * 
  * You can still override the channel mapping by setting `format` afterwards.
  * 
+ * NOTE: One important thing to keep in mind is that, on some targets/libs, a
+ * pixel with an alpha value of zero doesn't necessarily mean that RGB will be
+ * zero too (f.e. openfl with neko/cpp targets). This means that instead of 
+ * relying blindly on RGB values you should - in such cases - first test the 
+ * alpha one.
+ * 
  * @author azrafe7
  */
 @:forward
@@ -28,25 +34,25 @@ abstract Pixels(PixelsData)
 		this = new PixelsData(width, height, alloc);
 	}
 	
-	/** Byte value at `i` position, as if the data were in ARGB format. */
+	/** Returns the byte value at `i` position, as if the data were in ARGB format. */
 	@:arrayAccess
 	inline public function getByte(i:Int) {
 		return this.bytes.get((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK]);
 	}
 	
-	/** Pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
-	inline public function getPixel(x:Int, y:Int) {
+	/** Returns the pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
+	public function getPixel(x:Int, y:Int):Pixel {
 		var pos = (y * this.width + x) << 2;
 		
 		var r = this.bytes.get(pos + this.format.R) << 16;
 		var g = this.bytes.get(pos + this.format.G) << 8;
 		var b = this.bytes.get(pos + this.format.B);
 		
-		return r | g | b;
+		return cast (r | g | b);
 	}
 	
-	/** Pixel value (with alpha) at `x`,`y`, as if the data were in ARGB format. */
-	inline public function getPixel32(x:Int, y:Int) {
+	/** Returns the pixel value (with alpha) at `x`,`y`, as if the data were in ARGB format. */
+	public function getPixel32(x:Int, y:Int):Pixel {
 		var pos = (y * this.width + x) << 2;
 		
 		var a = this.bytes.get(pos + this.format.A) << 24;
@@ -54,17 +60,17 @@ abstract Pixels(PixelsData)
 		var g = this.bytes.get(pos + this.format.G) << 8;
 		var b = this.bytes.get(pos + this.format.B);
 		
-		return a | r | g | b;
+		return cast (a | r | g | b);
 	}
 	
 	/** Sets the byte value at `i` pos, as if the data were in ARGB format. */
 	@:arrayAccess
-	inline public function setByte(i:Int, value:Int) {
+	public function setByte(i:Int, value:Int) {
 		this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
 	}
 	
 	/** Sets the pixel value (without alpha) at `x`,`y`, with `value` expressed in RGB format. */
-	inline public function setPixel(x:Int, y:Int, value:Int) {
+	public function setPixel(x:Int, y:Int, value:Int) {
 		var pos = (y * this.width + x) << 2;
 		
 		var r = (value >> 16) & 0xFF;
@@ -77,7 +83,7 @@ abstract Pixels(PixelsData)
 	}
 	
 	/** Sets the pixel value (with alpha) at `x`,`y`, with `value` expressed in ARGB format. */
-	inline public function setPixel32(x:Int, y:Int, value:Int) {
+	public function setPixel32(x:Int, y:Int, value:Int) {
 		var pos = (y * this.width + x) << 2;
 		
 		var a = (value >> 24) & 0xFF;
@@ -281,6 +287,7 @@ abstract Pixels(PixelsData)
 #end
 }
 
+
 @:allow(hxPixels.Pixels)
 private class PixelsData
 {
@@ -372,4 +379,66 @@ class PixelFormat {
 	var CH_3 = 3;
 	
 	@:op(A + B) static function add(a:Int, b:Channel):Int;
+}
+
+/** 
+ * Abstracts an ARGB pixel over Int. 
+ * 
+ * NOTE: it's just a convenience class to easily access ARGB channels' values (wrapping bit math).
+ * Since it's built on top of a primitive (value) type, be careful with what you expect when 
+ * assigning to it. In particular consider that:
+ * 
+ *   `pixels.getPixel32(10, 10).R = 0xFF;`
+ * 
+ * will NOT modify the actual pixel (but just an Int copy/representation of it!)
+ * 
+ * What you really want is probably:
+ * 
+ *   `var pixel = pixels.getPixel32(10, 10);
+ *    pixel.R = 0xFF;
+ *    pixels.setPixel32(10, 10, pixel);`
+ * 
+ */
+@:forward
+abstract Pixel(Int) from Int to Int 
+{
+	public var A(get, set):Int;
+	inline private function get_A():Int {
+		return (this >> 24) & 0xFF;
+	}
+	inline private function set_A(a:Int):Int {
+		a = a & 0xFF;
+		this = (this & 0x00FFFFFF) | (a << 24);
+		return a;
+	}
+	
+	public var R(get, set):Int;
+	inline private function get_R():Int {
+		return (this >> 16) & 0xFF;
+	}
+	inline private function set_R(r:Int):Int {
+		r = r & 0xFF;
+		this = (this & 0xFF00FFFF) | (r << 16);
+		return r;
+	}
+	
+	public var G(get, set):Int;
+	inline private function get_G():Int {
+		return (this >> 8) & 0xFF;
+	}
+	inline private function set_G(g:Int):Int {
+		g = g & 0xFF;
+		this = (this & 0xFFFF00FF) | (g << 8);
+		return g;
+	}
+	
+	public var B(get, set):Int;
+	inline private function get_B():Int {
+		return this & 0xFF;
+	}
+	inline private function set_B(b:Int):Int {
+		b = b & 0xFF;
+		this = (this & 0xFFFFFF00) | b;
+		return b;
+	}
 }
