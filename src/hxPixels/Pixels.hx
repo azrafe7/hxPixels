@@ -121,10 +121,11 @@ abstract Pixels(PixelsData)
 #if (flambe) // in flambe texture bytes are in RGBA format
 
 	@:from static public function fromFlambeTexture(texture:flambe.display.Texture) {
-		var pixels = new Pixels(texture.width, texture.height, false);
+		var pixels = new Pixels(texture.width, texture.height, true);
 		pixels.format = PixelFormat.RGBA;
 		
-		pixels.bytes = texture.readPixels(0, 0, texture.width, texture.height);
+		var data = texture.readPixels(0, 0, texture.width, texture.height);
+		pixels.bytes.blit(0, data, 0, data.length);
 		
 		return pixels;
 	}

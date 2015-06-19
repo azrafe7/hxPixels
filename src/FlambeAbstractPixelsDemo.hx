@@ -66,8 +66,8 @@ class FlambeAbstractPixelsDemo
 		pixels.applyToFlambeTexture(texture);
 	#else
 		pixels.applyToBitmapData(bitmapData);
-		entity.remove(sprite);
 		texture = System.renderer.createTextureFromImage(bitmapData);
+		entity.remove(sprite);
         sprite = new ImageSprite(texture).centerAnchor().setXY(System.stage.width/2, System.stage.height/2);
         entity.add(sprite);
 	#end
@@ -78,7 +78,7 @@ class FlambeAbstractPixelsDemo
 	#if flash
 		flash.external.ExternalInterface.call("console.log", x);
 	#else
-		trace(x);
+		js.Browser.console.log(x);
 	#end
 	}
 }
