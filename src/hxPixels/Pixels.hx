@@ -65,7 +65,7 @@ abstract Pixels(PixelsData)
 	
 	/** Sets the byte value at `i` pos, as if the data were in ARGB format. */
 	@:arrayAccess
-	public function setByte(i:Int, value:Int) {
+	inline public function setByte(i:Int, value:Int) {
 		this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
 	}
 	
@@ -125,7 +125,7 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 
-#if (sys && format)	// convert from png, bmp and gif data using the format lib (underlying bytes in BGRA format)
+#if (sys && format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
 
 	@:from static public function fromPNGData(data:format.png.Data) {
 		var header = format.png.Tools.getHeader(data);
@@ -144,7 +144,7 @@ abstract Pixels(PixelsData)
 			var srcPos = i * 3;
 			var dstPos = i * 4;
 			pixels.bytes.blit(dstPos, data.pixels, srcPos, 3);
-			pixels[dstPos + 3] = 0xFF; // alpha
+			pixels.bytes.set(dstPos + 3, 0xFF); // alpha
 		}
 		pixels.format = PixelFormat.BGRA;
 		
