@@ -117,6 +117,56 @@ abstract Pixels(PixelsData)
 		clone.bytes.blit(0, this.bytes, 0, this.bytes.length);
 		return clone;
 	}
+
+	static public function fromBytes(bytes:Bytes, width:Int, height:Int, ?format:PixelFormat):Pixels {
+		var pixels = new Pixels(width, height, false);
+		if (format == null) format = PixelFormat.ARGB;
+		pixels.bytes = bytes;
+		return pixels;
+	}
+
+#if (sys && format)	// convert from png, bmp and gif data using the format lib (underlying bytes in BGRA format)
+
+	@:from static public function fromPNGData(data:format.png.Data) {
+		var header = format.png.Tools.getHeader(data);
+		var bytes = format.png.Tools.extract32(data);
+		var pixels = new Pixels(header.width, header.height, false);
+		pixels.bytes = bytes;
+		pixels.format = PixelFormat.BGRA;
+		
+		return pixels;
+	}
+
+	@:from static public function fromBMPData(data:format.bmp.Data) {
+		var pixels = new Pixels(data.header.width, data.header.height, true);
+		
+		for (i in 0...pixels.count) {
+			var srcPos = i * 3;
+			var dstPos = i * 4;
+			pixels.bytes.blit(dstPos, data.pixels, srcPos, 3);
+			pixels[dstPos + 3] = 0xFF; // alpha
+		}
+		pixels.format = PixelFormat.BGRA;
+		
+		return pixels;
+	}
+
+	static public function fromGIFData(data:format.gif.Data, frameIndex:Int = 0, full:Bool = true) {
+		var pixels:Pixels;
+		
+		if (full) {
+			pixels = new Pixels(data.logicalScreenDescriptor.width, data.logicalScreenDescriptor.height, false);
+			pixels.bytes = format.gif.Tools.extractFullBGRA(data, frameIndex);
+		} else {
+			var frame = format.gif.Tools.frame(data, frameIndex);
+			pixels = new Pixels(frame.width, frame.height, false);
+			pixels.bytes = format.gif.Tools.extractBGRA(data, frameIndex);
+		}
+		pixels.format = PixelFormat.BGRA;
+		
+		return pixels;
+	}
+#end
 	
 #if (flambe) // in flambe texture bytes are in RGBA format
 
