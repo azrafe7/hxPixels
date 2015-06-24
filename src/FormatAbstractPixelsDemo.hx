@@ -114,7 +114,10 @@ class FormatAbstractPixelsDemo {
 		var outputFileName = "out_" + fileName + ".png";
 		var file = sys.io.File.write(Path.join([dir, outputFileName]), true);
 		var pngWriter = new format.png.Writer(file);
-		var pngData = format.png.Tools.build32BGRA(pixels.width, pixels.height, pixels.bytes);
+		startTime = Timer.stamp();
+		pixels.convertTo(PixelFormat.ARGB);
+		trace('convert     ${Timer.stamp() - startTime}');
+		var pngData = format.png.Tools.build32ARGB(pixels.width, pixels.height, pixels.bytes);
 		pngWriter.write(pngData);
 		trace("written to '" + outputFileName + "'\n");
 	}

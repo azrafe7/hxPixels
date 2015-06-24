@@ -125,6 +125,36 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 
+	inline public function convertTo(format:PixelFormat):Pixels {
+		return convert(cast this, format, true);
+	}
+	
+	static public function convert(pixels:Pixels, toFormat:PixelFormat, inPlace:Bool = false):Pixels {
+		var res = inPlace ? pixels : pixels.clone();
+		
+		if (toFormat == pixels.format) return res;
+		
+		var i = 0;
+		while (i < pixels.count) {
+			var pos = i << 2;
+			
+			var a = pixels.getByte(pos + 0);
+			var r = pixels.getByte(pos + 1);
+			var g = pixels.getByte(pos + 2);
+			var b = pixels.getByte(pos + 3);
+			
+			res.bytes.set(pos + toFormat.A, a);
+			res.bytes.set(pos + toFormat.R, r);
+			res.bytes.set(pos + toFormat.G, g);
+			res.bytes.set(pos + toFormat.B, b);
+			
+			i++;
+		}
+		
+		res.format = toFormat;
+		return res;
+	}
+
 #if (format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
 
 	@:from static public function fromPNGData(data:format.png.Data) {
@@ -166,6 +196,7 @@ abstract Pixels(PixelsData)
 		
 		return pixels;
 	}
+
 #end
 	
 #if (flambe) // in flambe texture bytes are in RGBA format
