@@ -115,6 +115,7 @@ abstract Pixels(PixelsData)
 	public function clone():Pixels {
 		var clone:Pixels = new Pixels(this.width, this.height, true);
 		clone.bytes.blit(0, this.bytes, 0, this.bytes.length);
+		clone.format = this.format;
 		return clone;
 	}
 
