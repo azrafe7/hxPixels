@@ -1,0 +1,30 @@
+-cp src/
+-main FormatAbstractPixelsDemo
+-debug
+-lib format
+-resource assets/global/galapagosColor.png@galapagosColor.png
+-resource assets/global/galapagosGrey8bpp.png@galapagosGrey8bpp.png
+-resource assets/global/FromBitmap.png@FromBitmap.png
+-resource assets/global/pirate_small.png@pirate_small.png
+-resource assets/global/galapagosColor.bmp@galapagosColor.bmp
+-resource assets/global/xing_b24.bmp@xing_b24.bmp
+-resource assets/global/framechanges-2.gif@framechanges-2.gif
+-resource assets/global/transparent.gif@transparent.gif
+-resource assets/global/Fighter_attack.gif@Fighter_attack.gif
+-x bin/format/neko/FormatAbstractPixelsDemo
+
+--next
+-cp src/
+-main FormatAbstractPixelsDemo
+-debug
+-lib format
+-resource assets/global/galapagosColor.png@galapagosColor.png
+-resource assets/global/galapagosGrey8bpp.png@galapagosGrey8bpp.png
+-resource assets/global/FromBitmap.png@FromBitmap.png
+-resource assets/global/pirate_small.png@pirate_small.png
+-resource assets/global/galapagosColor.bmp@galapagosColor.bmp
+-resource assets/global/xing_b24.bmp@xing_b24.bmp
+-resource assets/global/framechanges-2.gif@framechanges-2.gif
+-resource assets/global/transparent.gif@transparent.gif
+-resource assets/global/Fighter_attack.gif@Fighter_attack.gif
+#-cpp bin/format/cpp
