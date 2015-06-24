@@ -125,7 +125,7 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 
-#if (sys && format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
+#if (format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
 
 	@:from static public function fromPNGData(data:format.png.Data) {
 		var header = format.png.Tools.getHeader(data);
