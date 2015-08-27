@@ -169,14 +169,10 @@ abstract Pixels(PixelsData)
 	}
 
 	@:from static public function fromBMPData(data:format.bmp.Data) {
-		var pixels = new Pixels(data.header.width, data.header.height, true);
-		
-		for (i in 0...pixels.count) {
-			var srcPos = i * 3;
-			var dstPos = i * 4;
-			pixels.bytes.blit(dstPos, data.pixels, srcPos, 3);
-			pixels.bytes.set(dstPos + 3, 0xFF); // alpha
-		}
+		var header = data.header;
+		var bytes = format.bmp.Tools.extractBGRA(data);
+		var pixels = new Pixels(header.width, header.height, false);
+		pixels.bytes = bytes;
 		pixels.format = PixelFormat.BGRA;
 		
 		return pixels;
