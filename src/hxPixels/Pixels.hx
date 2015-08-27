@@ -115,6 +115,7 @@ abstract Pixels(PixelsData)
 	public function clone():Pixels {
 		var clone:Pixels = new Pixels(this.width, this.height, true);
 		clone.bytes.blit(0, this.bytes, 0, this.bytes.length);
+		clone.format = this.format;
 		return clone;
 	}
 
@@ -125,7 +126,37 @@ abstract Pixels(PixelsData)
 		return pixels;
 	}
 
-#if (sys && format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
+	inline public function convertTo(format:PixelFormat):Pixels {
+		return convert(cast this, format, true);
+	}
+	
+	static public function convert(pixels:Pixels, toFormat:PixelFormat, inPlace:Bool = false):Pixels {
+		var res = inPlace ? pixels : pixels.clone();
+		
+		if (toFormat == pixels.format) return res;
+		
+		var i = 0;
+		while (i < pixels.count) {
+			var pos = i << 2;
+			
+			var a = pixels.getByte(pos + 0);
+			var r = pixels.getByte(pos + 1);
+			var g = pixels.getByte(pos + 2);
+			var b = pixels.getByte(pos + 3);
+			
+			res.bytes.set(pos + toFormat.A, a);
+			res.bytes.set(pos + toFormat.R, r);
+			res.bytes.set(pos + toFormat.G, g);
+			res.bytes.set(pos + toFormat.B, b);
+			
+			i++;
+		}
+		
+		res.format = toFormat;
+		return res;
+	}
+
+#if (format)	// convert from png, bmp and gif data using `HaxeFoundation/format` lib (underlying bytes in BGRA format)
 
 	@:from static public function fromPNGData(data:format.png.Data) {
 		var header = format.png.Tools.getHeader(data);
@@ -138,14 +169,10 @@ abstract Pixels(PixelsData)
 	}
 
 	@:from static public function fromBMPData(data:format.bmp.Data) {
-		var pixels = new Pixels(data.header.width, data.header.height, true);
-		
-		for (i in 0...pixels.count) {
-			var srcPos = i * 3;
-			var dstPos = i * 4;
-			pixels.bytes.blit(dstPos, data.pixels, srcPos, 3);
-			pixels.bytes.set(dstPos + 3, 0xFF); // alpha
-		}
+		var header = data.header;
+		var bytes = format.bmp.Tools.extractBGRA(data);
+		var pixels = new Pixels(header.width, header.height, false);
+		pixels.bytes = bytes;
 		pixels.format = PixelFormat.BGRA;
 		
 		return pixels;
@@ -166,6 +193,7 @@ abstract Pixels(PixelsData)
 		
 		return pixels;
 	}
+
 #end
 	
 #if (flambe) // in flambe texture bytes are in RGBA format
@@ -492,4 +520,92 @@ abstract Pixel(Int) from Int to Int
 		this = (this & 0xFFFFFF00) | b;
 		return b;
 	}
+  
+	// forward operators from Int (same order used in std/Int32)
+	@:op(-A) function negate():Pixel;
+	@:op(++A) function preIncrement():Pixel;
+	@:op(A++) function postIncrement():Pixel;
+	@:op(--A) function preDecrement():Pixel;
+	@:op(A--) function postDecrement():Pixel;
+	
+	@:op(A + B) static function add(a:Pixel, b:Pixel):Pixel;
+	@:op(A + B) @:commutative static function addInt(a:Pixel, b:Int):Pixel;
+	@:op(A + B) @:commutative static function addFloat(a:Pixel, b:Float):Float;
+	@:op(A - B) static function sub(a:Pixel, b:Pixel):Pixel;
+	@:op(A - B) static function subInt(a:Pixel, b:Int):Pixel;
+	@:op(A - B) static function intSub(a:Int, b:Pixel):Pixel;
+	@:op(A - B) static function subFloat(a:Pixel, b:Float):Float;
+	@:op(A - B) static function floatSub(a:Float, b:Pixel):Float;
+	@:op(A * B) static function mul(a:Pixel, b:Pixel):Pixel;
+	@:op(A * B) @:commutative static function mulInt(a:Pixel, b:Int):Pixel;
+	@:op(A * B) static function mul(a:Pixel, b:Pixel):Pixel;
+	@:op(A * B) @:commutative static function mulInt(a:Pixel, b:Int):Pixel;
+	@:op(A * B) @:commutative static function mulFloat(a:Pixel, b:Float):Float;
+	@:op(A / B) static function div(a:Pixel, b:Pixel):Float;
+	@:op(A / B) static function divInt(a:Pixel, b:Int):Float;
+	@:op(A / B) static function intDiv(a:Int, b:Pixel):Float;
+	@:op(A / B) static function divFloat(a:Pixel, b:Float):Float;
+	@:op(A / B) static function floatDiv(a:Float, b:Pixel):Float;
+
+	@:op(A % B) static function mod(a:Pixel, b:Pixel):Pixel;
+	@:op(A % B) static function modInt(a:Pixel, b:Int):Int;
+	@:op(A % B) static function intMod(a:Int, b:Pixel):Int;
+	@:op(A % B) static function modFloat(a:Pixel, b:Float):Float;
+	@:op(A % B) static function floatMod(a:Float, b:Pixel):Float;
+
+	@:op(A == B) static function eq(a:Pixel, b:Pixel):Bool;
+	@:op(A == B) @:commutative static function eqInt(a:Pixel, b:Int):Bool;
+	@:op(A == B) @:commutative static function eqFloat(a:Pixel, b:Float):Bool;
+
+	@:op(A != B) static function neq(a:Pixel, b:Pixel):Bool;
+	@:op(A != B) @:commutative static function neqInt(a:Pixel, b:Int):Bool;
+	@:op(A != B) @:commutative static function neqFloat(a:Pixel, b:Float):Bool;
+
+	@:op(A < B) static function lt(a:Pixel, b:Pixel):Bool;
+	@:op(A < B) static function ltInt(a:Pixel, b:Int):Bool;
+	@:op(A < B) static function intLt(a:Int, b:Pixel):Bool;
+	@:op(A < B) static function ltFloat(a:Pixel, b:Float):Bool;
+	@:op(A < B) static function floatLt(a:Float, b:Pixel):Bool;
+
+	@:op(A <= B) static function lte(a:Pixel, b:Pixel):Bool;
+	@:op(A <= B) static function lteInt(a:Pixel, b:Int):Bool;
+	@:op(A <= B) static function intLte(a:Int, b:Pixel):Bool;
+	@:op(A <= B) static function lteFloat(a:Pixel, b:Float):Bool;
+	@:op(A <= B) static function floatLte(a:Float, b:Pixel):Bool;
+
+	@:op(A > B) static function gt(a:Pixel, b:Pixel):Bool;
+	@:op(A > B) static function gtInt(a:Pixel, b:Int):Bool;
+	@:op(A > B) static function intGt(a:Int, b:Pixel):Bool;
+	@:op(A > B) static function gtFloat(a:Pixel, b:Float):Bool;
+	@:op(A > B) static function floatGt(a:Float, b:Pixel):Bool;
+
+	@:op(A >= B) static function gte(a:Pixel, b:Pixel):Bool;
+	@:op(A >= B) static function gteInt(a:Pixel, b:Int):Bool;
+	@:op(A >= B) static function intGte(a:Int, b:Pixel):Bool;
+	@:op(A >= B) static function gteFloat(a:Pixel, b:Float):Bool;
+	@:op(A >= B) static function floatGte(a:Float, b:Pixel):Bool;
+
+	@:op(~A) function complement():Pixel;
+
+	@:op(A & B) static function and(a:Pixel, b:Pixel):Pixel;
+	@:op(A & B) @:commutative static function andInt(a:Pixel, b:Int):Pixel;
+
+	@:op(A | B) static function or(a:Pixel, b:Pixel):Pixel;
+	@:op(A | B) @:commutative static function orInt(a:Pixel, b:Int):Pixel;
+
+	@:op(A ^ B) static function xor(a:Pixel, b:Pixel):Pixel;
+	@:op(A ^ B) @:commutative static function xorInt(a:Pixel, b:Int):Pixel;
+
+
+	@:op(A >> B) static function shr(a:Pixel, b:Pixel):Pixel;
+	@:op(A >> B) static function shrInt(a:Pixel, b:Int):Pixel;
+	@:op(A >> B) static function intShr(a:Int, b:Pixel):Pixel;
+
+	@:op(A >>> B) static function ushr(a:Pixel, b:Pixel):Pixel;
+	@:op(A >>> B) static function ushrInt(a:Pixel, b:Int):Pixel;
+	@:op(A >>> B) static function intUshr(a:Int, b:Pixel):Pixel;
+
+	@:op(A << B) static function shl(a:Pixel, b:Pixel):Pixel;
+	@:op(A << B) static function shlInt(a:Pixel, b:Int):Pixel;
+	@:op(A << B) static function intShl(a:Int, b:Pixel):Pixel;
 }

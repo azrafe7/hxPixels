@@ -103,6 +103,7 @@ class FormatAbstractPixelsDemo {
 		trace("pixels      " + pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(0, 0)));
 		
 		writeModifiedPNG(pixels, id);
+		writeModifiedBMP(pixels, id);
 	}
 	
 	public function writeModifiedPNG(pixels:Pixels, fileName:String) {
@@ -114,8 +115,28 @@ class FormatAbstractPixelsDemo {
 		var outputFileName = "out_" + fileName + ".png";
 		var file = sys.io.File.write(Path.join([dir, outputFileName]), true);
 		var pngWriter = new format.png.Writer(file);
-		var pngData = format.png.Tools.build32BGRA(pixels.width, pixels.height, pixels.bytes);
+		startTime = Timer.stamp();
+		pixels.convertTo(PixelFormat.ARGB);
+		trace('convert     ${Timer.stamp() - startTime}');
+		var pngData = format.png.Tools.build32ARGB(pixels.width, pixels.height, pixels.bytes);
 		pngWriter.write(pngData);
+		trace("written to '" + outputFileName + "'\n");
+	}
+	
+	public function writeModifiedBMP(pixels:Pixels, fileName:String) {
+	#if neko	
+		var dir = Path.directory(neko.vm.Module.local().name);
+	#else
+		var dir = Path.directory(Sys.executablePath());
+	#end
+		var outputFileName = "out_" + fileName + ".bmp";
+		var file = sys.io.File.write(Path.join([dir, outputFileName]), true);
+		var bmpWriter = new format.bmp.Writer(file);
+		startTime = Timer.stamp();
+		pixels.convertTo(PixelFormat.ARGB);
+		trace('convert     ${Timer.stamp() - startTime}');
+		var bmpData = format.bmp.Tools.buildFromARGB(pixels.width, pixels.height, pixels.bytes);
+		bmpWriter.write(bmpData);
 		trace("written to '" + outputFileName + "'\n");
 	}
 }
