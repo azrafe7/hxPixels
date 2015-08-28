@@ -267,11 +267,11 @@ abstract Pixels(PixelsData)
 		pixels.format = PixelFormat.RGBA;
 		
 		// force buffer creation
-		var image = @:privateAccess bmd.__image;
+		var image = bmd.image;
 		lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
 		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
 		
-		var data = @:privateAccess bmd.__image.buffer.data;
+		var data = bmd.image.buffer.data;
 		pixels.bytes = Bytes.ofData(data.buffer);
 		
 	#else
@@ -295,7 +295,7 @@ abstract Pixels(PixelsData)
 	public function applyToBitmapData(bmd:flash.display.BitmapData) {
 	#if js
 		
-		var image = @:privateAccess bmd.__image;
+		var image = bmd.image;
 		
 		if (@:privateAccess image.buffer.__srcImageData == null) { // NOTE: find a way to speed this up
 			for (y in 0...this.height) {
@@ -305,7 +305,6 @@ abstract Pixels(PixelsData)
 			}
 		} else {
 			image.dirty = true;
-			lime.graphics.utils.ImageCanvasUtil.sync(image);
 		}
 		
 	#else
