@@ -20,6 +20,7 @@ import haxe.io.Bytes;
  * 
  * @author azrafe7
  */
+@:expose
 @:forward
 abstract Pixels(PixelsData)
 {
@@ -404,6 +405,8 @@ private class PixelsData
 	}
 }
 
+@:expose
+@:allow(hxPixels.Pixels)
 class PixelFormat {
 	
 	static public var ARGB(default, null):PixelFormat;
@@ -477,6 +480,7 @@ class PixelFormat {
  *    pixels.setPixel32(10, 10, pixel);`
  * 
  */
+@:expose
 @:forward
 abstract Pixel(Int) from Int to Int 
 {
