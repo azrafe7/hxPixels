@@ -291,20 +291,28 @@ abstract Pixels(PixelsData)
 		lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
 		lime.graphics.utils.ImageCanvasUtil.createImageData(image);
 		
-		var data = bmd.image.buffer.data;
+		var data = image.buffer.data;
 		pixels.bytes = Bytes.ofData(data.buffer);
 		
 	#else
 		
 		var pixels = new Pixels(bmd.width, bmd.height, false);
-		pixels.format = PixelFormat.ARGB;
-		
-		var ba = bmd.getPixels(bmd.rect);
-		
+
 		#if flash
+			pixels.format = PixelFormat.ARGB;
+			
+			var ba = bmd.getPixels(bmd.rect);
 			pixels.bytes = Bytes.ofData(ba);
-		#else
+		#elseif (!openfl_next)
+			pixels.format = PixelFormat.ARGB;
+			
+			var ba = bmd.getPixels(bmd.rect);
 			pixels.bytes = Bytes.ofData(ba.getData());
+		#else
+			pixels.format = PixelFormat.BGRA;
+			
+			var data = @:privateAccess bmd.image.buffer.data.buffer.getData();
+			pixels.bytes = Bytes.ofData(data);
 		#end
 	
 	#end
@@ -323,21 +331,25 @@ abstract Pixels(PixelsData)
 					bmd.setPixel32(x, y, getPixel32(x, y));
 				}
 			}
-		} else {
-			image.dirty = true;
 		}
 		
+		image.dirty = true;
+		lime.graphics.utils.ImageCanvasUtil.sync(bmd.image, true);
+        
 	#else
 	
 		#if flash
 			var ba = this.bytes.getData();
 			ba.endian = flash.utils.Endian.BIG_ENDIAN;
-		#else
+			ba.position = 0;
+			bmd.setPixels(bmd.rect, ba);
+		#elseif (!openfl_next)
 			var ba = openfl.utils.ByteArray.fromBytes(this.bytes);
+			ba.position = 0;
+			bmd.setPixels(bmd.rect, ba);
+		#else
+			bmd.image.buffer.data = openfl.utils.UInt8Array.fromBytes(this.bytes);
 		#end
-		
-		ba.position = 0;
-		bmd.setPixels(bmd.rect, ba);
 		
 	#end
 	}
