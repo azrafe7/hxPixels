@@ -137,20 +137,39 @@ abstract Pixels(PixelsData)
 		if (toFormat == pixels.format) return res;
 		
 		var i = 0;
-		while (i < pixels.count) {
-			var pos = i << 2;
-			
-			var a = pixels.getByte(pos + 0);
-			var r = pixels.getByte(pos + 1);
-			var g = pixels.getByte(pos + 2);
-			var b = pixels.getByte(pos + 3);
-			
-			res.bytes.set(pos + toFormat.A, a);
-			res.bytes.set(pos + toFormat.R, r);
-			res.bytes.set(pos + toFormat.G, g);
-			res.bytes.set(pos + toFormat.B, b);
-			
-			i++;
+		var pos = 0;
+		
+		// fast path in case only B and R have to be swapped
+		if ((pixels.format == PixelFormat.BGRA && toFormat == PixelFormat.RGBA) ||
+			(pixels.format == PixelFormat.RGBA && toFormat == PixelFormat.BGRA))
+		{
+			while (i < pixels.count) {
+				
+				var r = pixels.getByte(pos + 1);
+				var b = pixels.getByte(pos + 3);
+				
+				res.bytes.set(pos + toFormat.R, r);
+				res.bytes.set(pos + toFormat.B, b);
+				
+				i++;
+				pos += 4;
+			}
+		} else {
+			while (i < pixels.count) {
+				
+				var a = pixels.getByte(pos + 0);
+				var r = pixels.getByte(pos + 1);
+				var g = pixels.getByte(pos + 2);
+				var b = pixels.getByte(pos + 3);
+				
+				res.bytes.set(pos + toFormat.A, a);
+				res.bytes.set(pos + toFormat.R, r);
+				res.bytes.set(pos + toFormat.G, g);
+				res.bytes.set(pos + toFormat.B, b);
+				
+				i++;
+				pos += 4;
+			}
 		}
 		
 		res.format = toFormat;
