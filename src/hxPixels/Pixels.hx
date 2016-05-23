@@ -413,7 +413,12 @@ class PixelFormat {
 	static public var RGBA(default, null):PixelFormat;
 	static public var BGRA(default, null):PixelFormat;
 	
-	public var channelMap(default, null):Array<Channel>;
+	/** Internal. Don't modify any of these. */
+	var channelMap:Array<Channel>;
+	var ch0:Int;
+	var ch1:Int;
+	var ch2:Int;
+	var ch3:Int;
 	
 	var name:String;
 	
@@ -425,27 +430,31 @@ class PixelFormat {
 	
 	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
 		this.channelMap = [a, r, g, b];
+		this.ch0 = a;
+		this.ch1 = r;
+		this.ch2 = g;
+		this.ch3 = b;
 		this.name = name;
 	}
 	
 	public var A(get, null):Int;
 	inline private function get_A():Int {
-		return channelMap[0];
+		return ch0;
 	}
 	
 	public var R(get, null):Int;
 	inline private function get_R():Int {
-		return channelMap[1];
+		return ch1;
 	}
 	
 	public var G(get, null):Int;
 	inline private function get_G():Int {
-		return channelMap[2];
+		return ch2;
 	}
 	
 	public var B(get, null):Int;
 	inline private function get_B():Int {
-		return channelMap[3];
+		return ch3;
 	}
 	
 	public function toString():String {
