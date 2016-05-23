@@ -103,8 +103,10 @@ class AbstractPixelsDemo extends Sprite {
 		
 		// trace info
 		trace("pixels      " + pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
+	#if !(html5 && openfl_legacy)
 		trace("bitmapData  " + bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(100, 100)) + "\n");
-		
+	#end
+	
 		// key presses
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 	}
