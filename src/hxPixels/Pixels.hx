@@ -303,16 +303,18 @@ abstract Pixels(PixelsData)
 			
 			var ba = bmd.getPixels(bmd.rect);
 			pixels.bytes = Bytes.ofData(ba);
-		#elseif (!openfl_next)
-			pixels.format = PixelFormat.ARGB;
-			
-			var ba = bmd.getPixels(bmd.rect);
-			pixels.bytes = Bytes.ofData(ba.getData());
-		#else
+		#elseif (openfl_next || openfl >= "4.0.0")
+			//trace("!flash openfl");
 			pixels.format = PixelFormat.BGRA;
 			
 			var data = @:privateAccess bmd.image.buffer.data.buffer.getData();
 			pixels.bytes = Bytes.ofData(data);
+		#else
+			//trace("!next openfl < 4.0.0");
+			pixels.format = PixelFormat.ARGB;
+			
+			var ba = bmd.getPixels(bmd.rect);
+			pixels.bytes = (ba);
 		#end
 	
 	#end
@@ -324,7 +326,7 @@ abstract Pixels(PixelsData)
 	#if js
 		
 		var image = bmd.image;
-		
+			
 		if (@:privateAccess image.buffer.__srcImageData == null) { // NOTE: find a way to speed this up
 			for (y in 0...this.height) {
 				for (x in 0...this.width) {
@@ -333,8 +335,9 @@ abstract Pixels(PixelsData)
 			}
 		}
 		
+		lime.graphics.utils.ImageCanvasUtil.convertToData(image);
 		image.dirty = true;
-		lime.graphics.utils.ImageCanvasUtil.sync(bmd.image, true);
+		//lime.graphics.utils.ImageCanvasUtil.sync(image, true);
         
 	#else
 	
@@ -343,12 +346,14 @@ abstract Pixels(PixelsData)
 			ba.endian = flash.utils.Endian.BIG_ENDIAN;
 			ba.position = 0;
 			bmd.setPixels(bmd.rect, ba);
-		#elseif (!openfl_next)
+		#elseif (openfl_next || openfl >= "4.0.0")
+			//trace("!flash openfl");
+			bmd.image.buffer.data = openfl.utils.UInt8Array.fromBytes(this.bytes);
+		#else
+			//trace("!next openfl < 4.0.0");
 			var ba = openfl.utils.ByteArray.fromBytes(this.bytes);
 			ba.position = 0;
 			bmd.setPixels(bmd.rect, ba);
-		#else
-			bmd.image.buffer.data = openfl.utils.UInt8Array.fromBytes(this.bytes);
 		#end
 		
 	#end
@@ -459,7 +464,7 @@ class PixelFormat {
 		BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
 	}
 	
-	public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
+	inline public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
 		this.channelMap = [a, r, g, b];
 		this.ch0 = a;
 		this.ch1 = r;
