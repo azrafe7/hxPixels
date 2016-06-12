@@ -250,7 +250,7 @@ abstract Pixels(PixelsData)
 	}
 	
 	@:from static public function fromLuxeAssetImage(assetImage:snow.types.Types.AssetImage) {
-		var image:snow.types.Types.ImageInfo = assetImage.image;
+		var image:snow.types.Types.ImageData = assetImage.image;
 		var pixels = new Pixels(image.width, image.height, true);
 		pixels.format = PixelFormat.RGBA;
 		
