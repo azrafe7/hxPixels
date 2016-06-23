@@ -326,34 +326,49 @@ abstract Pixels(PixelsData)
 	#if js
 		
 		var image = bmd.image;
-			
-		if (@:privateAccess image.buffer.__srcImageData == null) { // NOTE: find a way to speed this up
-			for (y in 0...this.height) {
-				for (x in 0...this.width) {
-					bmd.setPixel32(x, y, getPixel32(x, y));
-				}
-			}
-		}
 		
-		lime.graphics.utils.ImageCanvasUtil.convertToData(image);
-		image.dirty = true;
-		//lime.graphics.utils.ImageCanvasUtil.sync(image, true);
+		#if (openfl < "4.0.0")
+		
+			lime.graphics.utils.ImageCanvasUtil.convertToData(image);
+			image.dirty = true;
+			
+		#else
+		
+			image.buffer.data = lime.utils.UInt8Array.fromBytes(this.bytes);
+			image.type = lime.graphics.ImageType.DATA;
+			image.dirty = true;
+			image.version++;
+			
+		#end
         
 	#else
 	
 		#if flash
+			
 			var ba = this.bytes.getData();
 			ba.endian = flash.utils.Endian.BIG_ENDIAN;
 			ba.position = 0;
 			bmd.setPixels(bmd.rect, ba);
+			
 		#elseif (openfl_next || openfl >= "4.0.0")
+			
 			//trace("!flash openfl");
 			bmd.image.buffer.data = openfl.utils.UInt8Array.fromBytes(this.bytes);
+			
+			#if (openfl >= "4.0.0")
+				
+				bmd.image.dirty = true;
+				bmd.image.version++;
+				
+			#end
+			
 		#else
+			
 			//trace("!next openfl < 4.0.0");
 			var ba = openfl.utils.ByteArray.fromBytes(this.bytes);
 			ba.position = 0;
 			bmd.setPixels(bmd.rect, ba);
+			
 		#end
 		
 	#end
@@ -411,7 +426,7 @@ private class PixelsData
 	/** Total number of pixels. */
 	public var count(default, null):Int;
 	
-	/** Bytes representing the pixels (in `format` pixel format). */
+	/** Bytes representing the pixels (in the raw format used by the original source). */
 	public var bytes(default, null):Bytes;
 	
 	/** Width of the source image. */
