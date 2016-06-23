@@ -11,6 +11,7 @@ import flash.Lib;
 import haxe.Timer;
 import hxPixels.Pixels;
 
+
 #if !openfl
 @:bitmap("assets/global/galapagosColor.png")
 class Asset1 extends flash.display.BitmapData {}
@@ -41,7 +42,7 @@ class AbstractPixelsDemo extends Sprite {
 		"assets/global/FromBitmap.png"
 	];
 	
-	
+
 	public static function main(): Void {
 		Lib.current.addChild(new AbstractPixelsDemo());
 	}
@@ -57,6 +58,10 @@ class AbstractPixelsDemo extends Sprite {
 		#end
 			test(bmd, asset);
 		}
+		
+		// programmatically generated test BitmapData
+		var bmd = new BitmapData(480, 80, true, 0xA0102030);
+		test(bmd, "generated BMD");
 	}
 	
 	public function test(bitmapData:BitmapData, id:String):Void {
@@ -102,9 +107,9 @@ class AbstractPixelsDemo extends Sprite {
 		trace('apply       ${Timer.stamp() - startTime}');
 		
 		// trace info
-		trace("pixels      " + pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(100, 100)));
+		trace("pixels      " + pixels.width, pixels.height, pixels.count, StringTools.hex(pixels.getPixel32(50, 50)));
 	#if !(html5 && openfl_legacy)
-		trace("bitmapData  " + bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(100, 100)) + "\n");
+		trace("bitmapData  " + bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, StringTools.hex(bitmapData.getPixel32(50, 50)) + "\n");
 	#end
 	
 		// key presses
