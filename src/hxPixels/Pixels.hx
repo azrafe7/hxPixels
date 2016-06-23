@@ -342,7 +342,7 @@ abstract Pixels(PixelsData)
 		#end
         
 	#else
-	
+		
 		#if flash
 			
 			var ba = this.bytes.getData();
