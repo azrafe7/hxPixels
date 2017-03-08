@@ -12,7 +12,7 @@ import haxe.Timer;
 import hxPixels.Pixels;
 
 
-#if !openfl
+#if ((!openfl) || use_loader)
 @:bitmap("assets/global/galapagosColor.png")
 class Asset1 extends flash.display.BitmapData {}
 
@@ -23,10 +23,15 @@ class Assets {
 	
 	static var assets:Map<String, BitmapData>;
 	
-	static function __init__():Void {
-		assets = new Map();
+  static var inited:Bool = false;
+  
+	static public function init():Void {
+		if (inited) return;
+    
+    assets = new Map();
 		assets["assets/global/galapagosColor.png"] = new Asset1(0, 0);
 		assets["assets/global/FromBitmap.png"] = new Asset2(0, 0);
+    inited = true;
 	}
 	
 	static public function get(id:String):BitmapData {
@@ -37,9 +42,9 @@ class Assets {
 
 class AbstractPixelsDemo extends Sprite {
 
-	var assets:Array<String> = [
-		"assets/global/galapagosColor.png",
-		"assets/global/FromBitmap.png"
+	var assets:Map<String,String> = [
+		"assets/global/galapagosColor.png" => "Asset1",
+		"assets/global/FromBitmap.png" => "Asset2"
 	];
 	
 
@@ -50,20 +55,36 @@ class AbstractPixelsDemo extends Sprite {
 	public function new() {
 		super();
 		
-		for (asset in assets) {
-		#if openfl
-			var bmd = openfl.Assets.getBitmapData(asset);
+  #if use_loader
+    var loader = new ImageLoader();
+    trace(" -- using loader --");
+  #end
+    
+		for (key in assets.keys()) {
+      
+		#if (openfl && !use_loader)
+    
+      trace(openfl.Assets.exists(key));
+			var bmd = openfl.Assets.getBitmapData(key, false);
+      
 		#else
-			var bmd = Assets.get(asset);
+    
+      var clsName = assets[key];
+      var cls:Class<flash.display.BitmapData> = cast Type.resolveClass(clsName);
+      loader.load([cls], function (loader:ImageLoader):Void {
+        test(loader.getBitmapData(clsName), key);
+      }, 1, function(_) { trace("error"); } );
+      
 		#end
-			test(bmd, asset);
+    
 		}
 		
 		// programmatically generated test BitmapData
 		var bmd = new BitmapData(480, 80, true, 0xA0102030);
+		//bmd.image.buffer.premultiplied = true;
 		test(bmd, "generated BMD");
-	}
-	
+  }
+  
 	public function test(bitmapData:BitmapData, id:String):Void {
 		
 		// show the image bmp
@@ -73,7 +94,7 @@ class AbstractPixelsDemo extends Sprite {
 		bitmap.y = (Lib.current.stage.stageHeight - bitmap.height) / 2;
 		
 		trace('[ testing $id ]');
-		
+		trace(" -- " + bitmap.width);
 		// load bitmapData into pixels abstract
 		var startTime = Timer.stamp();
 		var pixels:Pixels = bitmapData;
