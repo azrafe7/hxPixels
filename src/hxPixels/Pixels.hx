@@ -299,22 +299,28 @@ abstract Pixels(PixelsData)
 		var pixels = new Pixels(bmd.width, bmd.height, false);
 
 		#if flash
+		
 			pixels.format = PixelFormat.ARGB;
 			
 			var ba = bmd.getPixels(bmd.rect);
 			pixels.bytes = Bytes.ofData(ba);
+			
 		#elseif (openfl_next || openfl >= "4.0.0")
+		
 			//trace("!flash openfl");
 			pixels.format = PixelFormat.BGRA;
 			
 			var data = @:privateAccess bmd.image.buffer.data.buffer.getData();
 			pixels.bytes = Bytes.ofData(data);
+			
 		#else
+		
 			//trace("!next openfl < 4.0.0");
 			pixels.format = PixelFormat.ARGB;
 			
 			var ba = bmd.getPixels(bmd.rect);
 			pixels.bytes = (ba);
+			
 		#end
 	
 	#end
@@ -342,7 +348,7 @@ abstract Pixels(PixelsData)
 		#end
         
 	#else
-		
+	
 		#if flash
 			
 			var ba = this.bytes.getData();
@@ -466,10 +472,10 @@ class PixelFormat {
 	
 	/** Internal. Don't modify any of these. */
 	var channelMap:Array<Channel>;
-	var ch0:Int;
-	var ch1:Int;
-	var ch2:Int;
-	var ch3:Int;
+	var ch0:Channel;
+	var ch1:Channel;
+	var ch2:Channel;
+	var ch3:Channel;
 	
 	var name:String;
 	
@@ -488,23 +494,23 @@ class PixelFormat {
 		this.name = name;
 	}
 	
-	public var A(get, null):Int;
-	inline private function get_A():Int {
+	public var A(get, null):Channel;
+	inline private function get_A():Channel {
 		return ch0;
 	}
 	
-	public var R(get, null):Int;
-	inline private function get_R():Int {
+	public var R(get, null):Channel;
+	inline private function get_R():Channel {
 		return ch1;
 	}
 	
-	public var G(get, null):Int;
-	inline private function get_G():Int {
+	public var G(get, null):Channel;
+	inline private function get_G():Channel {
 		return ch2;
 	}
 	
-	public var B(get, null):Int;
-	inline private function get_B():Int {
+	public var B(get, null):Channel;
+	inline private function get_B():Channel {
 		return ch3;
 	}
 	
