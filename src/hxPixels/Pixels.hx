@@ -408,17 +408,22 @@ abstract Pixels(PixelsData)
 #if js	// plain js - conversion from ImageData
 
 	@:from static public function fromImageData(image:js.html.ImageData) {
-		var pixels = new Pixels(image.width, image.height, true);
-		pixels.format = PixelFormat.ARGB;
+		var pixels = new Pixels(image.width, image.height, false);
+		pixels.format = PixelFormat.RGBA;
 		
-		var data = image.data;
+		var u8clampedArray:js.html.Uint8ClampedArray = image.data;
 		
-		for (i in 0...data.byteLength) {
-			pixels.bytes.set(i, data[i]);
-		}
-		
+    var u8Array = haxe.io.UInt8Array.fromData(cast u8ClampedArray);
+    pixels.bytes = u8Array.view.buffer;
+
 		return pixels;
 	}
+
+  public function applyToImageData(imageData:js.html.ImageData) {
+    var u8clampedArray = new js.html.Uint8ClampedArray(this.bytes.getData());
+    imageData.data.set(u8clampedArray);
+    return imageData;
+  }
 
 #end
 }
