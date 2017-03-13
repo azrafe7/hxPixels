@@ -411,7 +411,7 @@ abstract Pixels(PixelsData)
     var pixels = new Pixels(image.width, image.height, false);
     pixels.format = PixelFormat.RGBA;
     
-    var u8clampedArray:js.html.Uint8ClampedArray = image.data;
+    var u8ClampedArray:js.html.Uint8ClampedArray = image.data;
     
     var u8Array = haxe.io.UInt8Array.fromData(cast u8ClampedArray);
     pixels.bytes = u8Array.view.buffer;
