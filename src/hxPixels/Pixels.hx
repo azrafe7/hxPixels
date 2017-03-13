@@ -547,9 +547,14 @@ class PixelFormat {
  * What you really want is probably:
  * 
  *   `var pixel = pixels.getPixel32(10, 10);
- *    pixel.R = 0xFF;
+ *    pixel.R = 0xFF;  // or pixel.fR = 1.0;
  *    pixels.setPixel32(10, 10, pixel);`
  * 
+ * Also note that, for performance reasons, no clamping is performed when setting values, i.e.:
+ * 
+ *   `pixel.B = 0xFFFF;`
+ * 
+ * is perfectly valid, but will probably result in unwanted behaviour.
  */
 @:expose
 @:forward
@@ -588,6 +593,43 @@ abstract Pixel(Int) from Int to Int
   }
   inline private function set_B(b:Int):Int {
     this = (this & 0xFFFFFF00) | b;
+    return b;
+  }
+  
+  // channels as floats (expected range is [0...1])
+  public var fA(get, set):Float;
+  inline private function get_fA():Float {
+    return (this : Pixel).A / 255.;
+  }
+  inline private function set_fA(a:Float):Float {
+    this = (this & 0x00FFFFFF) | (Std.int(a * 255) << 24);
+    return a;
+  }
+  
+  public var fR(get, set):Float;
+  inline private function get_fR():Float {
+    return (this : Pixel).R / 255.;
+  }
+  inline private function set_fR(r:Float):Float {
+    this = (this & 0xFF00FFFF) | (Std.int(r * 255) << 16);
+    return r;
+  }
+  
+  public var fG(get, set):Float;
+  inline private function get_fG():Float {
+    return (this : Pixel).G / 255.;
+  }
+  inline private function set_fG(g:Float):Float {
+    this = (this & 0xFFFF00FF) | (Std.int(g * 255) << 8);
+    return g;
+  }
+  
+  public var fB(get, set):Float;
+  inline private function get_fB():Float {
+    return (this : Pixel).B / 255.;
+  }
+  inline private function set_fB(b:Float):Float {
+    this = (this & 0xFFFFFF00) | (Std.int(b * 255));
     return b;
   }
   
