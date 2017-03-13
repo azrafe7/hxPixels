@@ -560,7 +560,6 @@ abstract Pixel(Int) from Int to Int
     return (this >> 24) & 0xFF;
   }
   inline private function set_A(a:Int):Int {
-    a = a & 0xFF;
     this = (this & 0x00FFFFFF) | (a << 24);
     return a;
   }
@@ -570,7 +569,6 @@ abstract Pixel(Int) from Int to Int
     return (this >> 16) & 0xFF;
   }
   inline private function set_R(r:Int):Int {
-    r = r & 0xFF;
     this = (this & 0xFF00FFFF) | (r << 16);
     return r;
   }
@@ -580,7 +578,6 @@ abstract Pixel(Int) from Int to Int
     return (this >> 8) & 0xFF;
   }
   inline private function set_G(g:Int):Int {
-    g = g & 0xFF;
     this = (this & 0xFFFF00FF) | (g << 8);
     return g;
   }
@@ -590,7 +587,6 @@ abstract Pixel(Int) from Int to Int
     return this & 0xFF;
   }
   inline private function set_B(b:Int):Int {
-    b = b & 0xFF;
     this = (this & 0xFFFFFF00) | b;
     return b;
   }
