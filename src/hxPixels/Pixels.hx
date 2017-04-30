@@ -1,6 +1,8 @@
 package hxPixels;
 
 import haxe.io.Bytes;
+import haxe.io.UInt8Array;
+import haxe.io.UInt32Array;
 
 
 /**
@@ -42,7 +44,7 @@ abstract Pixels(PixelsData)
   }
   
   /** Returns the pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
-  public function getPixel(x:Int, y:Int):Pixel {
+  inline public function getPixel(x:Int, y:Int):Pixel {
     var pos = (y * this.width + x) << 2;
     
     var r = this.bytes.get(pos + this.format.R) << 16;
@@ -53,7 +55,7 @@ abstract Pixels(PixelsData)
   }
   
   /** Returns the pixel value (with alpha) at `x`,`y`, as if the data were in ARGB format. */
-  public function getPixel32(x:Int, y:Int):Pixel {
+  inline public function getPixel32(x:Int, y:Int):Pixel {
     var pos = (y * this.width + x) << 2;
     
     var a = this.bytes.get(pos + this.format.A) << 24;
@@ -71,7 +73,7 @@ abstract Pixels(PixelsData)
   }
   
   /** Sets the pixel value (without alpha) at `x`,`y`, with `value` expressed in RGB format. */
-  public function setPixel(x:Int, y:Int, value:Int) {
+  inline public function setPixel(x:Int, y:Int, value:Int) {
     var pos = (y * this.width + x) << 2;
     
     var r = (value >> 16) & 0xFF;
@@ -84,7 +86,7 @@ abstract Pixels(PixelsData)
   }
   
   /** Sets the pixel value (with alpha) at `x`,`y`, with `value` expressed in ARGB format. */
-  public function setPixel32(x:Int, y:Int, value:Int) {
+  inline public function setPixel32(x:Int, y:Int, value:Int) {
     var pos = (y * this.width + x) << 2;
     
     var a = (value >> 24) & 0xFF;
@@ -438,7 +440,13 @@ private class PixelsData
   public var count(default, null):Int;
   
   /** Bytes representing the pixels (in the raw format used by the original source). */
-  public var bytes(default, null):Bytes;
+  public var bytes(default, set):Bytes;
+  function set_bytes(bytes:Bytes):Bytes {
+    this.bytes = bytes;
+    this.uint8Array = UInt8Array.fromBytes(bytes);
+    this.uint32Array = UInt32Array.fromBytes(bytes);
+    return this.bytes;
+  }
   
   /** Width of the source image. */
   public var width(default, null):Int;
@@ -448,6 +456,9 @@ private class PixelsData
   
   /** Internal pixel format. */
   public var format:PixelFormat;
+  
+  public var uint8Array:UInt8Array = null;
+  public var uint32Array:UInt32Array = null;
   
   /** 
    * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
