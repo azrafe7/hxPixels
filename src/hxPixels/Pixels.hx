@@ -112,7 +112,7 @@ abstract Pixels(PixelsData)
     for (y in 0...height) {
       this.bytes.blit(pos, stridePixels.bytes, 0, stride);
       pos += this.width << 2;
-    }		
+    }
   }
   
   public function clone():Pixels {
@@ -121,7 +121,7 @@ abstract Pixels(PixelsData)
     clone.format = this.format;
     return clone;
   }
-
+  
   static public function fromBytes(bytes:Bytes, width:Int, height:Int, ?format:PixelFormat):Pixels {
     var pixels = new Pixels(width, height, false);
     if (format == null) format = PixelFormat.ARGB;
@@ -353,6 +353,7 @@ abstract Pixels(PixelsData)
   
     #if flash
       
+      //trace("flash");
       var ba = this.bytes.getData();
       ba.endian = flash.utils.Endian.BIG_ENDIAN;
       ba.position = 0;
@@ -441,7 +442,7 @@ private class PixelsData
   
   /** Bytes representing the pixels (in the raw format used by the original source). */
   public var bytes(default, set):Bytes;
-  function set_bytes(bytes:Bytes):Bytes {
+  inline function set_bytes(bytes:Bytes):Bytes {
     this.bytes = bytes;
     this.uint8Array = UInt8Array.fromBytes(bytes);
     this.uint32Array = UInt32Array.fromBytes(bytes);
@@ -457,7 +458,9 @@ private class PixelsData
   /** Internal pixel format. */
   public var format:PixelFormat;
   
+  /** UInt8Array view over bytes. */
   public var uint8Array:UInt8Array = null;
+  /** UInt32Array view over bytes. */
   public var uint32Array:UInt32Array = null;
   
   /** 
