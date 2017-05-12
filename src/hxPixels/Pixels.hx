@@ -24,6 +24,7 @@ import haxe.io.UInt32Array;
  */
 @:expose
 @:forward
+@:native("Pixels")
 abstract Pixels(PixelsData)
 {
   static inline var CHANNEL_MASK:Int = 3;
@@ -572,6 +573,7 @@ class PixelFormat {
  */
 @:expose
 @:forward
+@:native("Pixel")
 abstract Pixel(Int) from Int to Int 
 {
   public var A(get, set):Int;
