@@ -125,7 +125,7 @@ abstract Pixels(PixelsData)
   
   static public function fromBytes(bytes:Bytes, width:Int, height:Int, ?format:PixelFormat):Pixels {
     var pixels = new Pixels(width, height, false);
-    if (format == null) format = PixelFormat.ARGB;
+    pixels.format = (format != null) ? format : PixelFormat.ARGB;
     pixels.bytes = bytes;
     return pixels;
   }
@@ -281,7 +281,7 @@ abstract Pixels(PixelsData)
   }
 #end
 
-#if (flash || openfl || nme || (flambe && flash))
+#if (!macro && (flash || openfl || nme || (flambe && flash)))
 
   @:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
   #if js	
