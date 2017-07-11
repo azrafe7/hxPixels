@@ -367,6 +367,7 @@ abstract Pixels(PixelsData)
       
       #if (openfl >= "4.0.0")
         
+        //trace("!flash openfl >= 4");
         bmd.image.dirty = true;
         bmd.image.version++;
         
@@ -503,6 +504,23 @@ class PixelFormat {
     ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
     RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
     BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
+  }
+  
+  inline static public function getNativeFormatFor(target:TargetType):PixelFormat {
+    return switch (target) {
+      case FORMAT: 
+        BGRA;
+      case FLASH, NME_FLASH, NME_DESKTOP, OPENFL_FLASH, FLAMBE_FLASH:
+        ARGB;
+      case OPENFL_DESKTOP:
+        BGRA;
+      case JS, OPENFL_JS, LUXE, FLAMBE_WEB:
+        RGBA;
+      case JAVA:
+        RGBA;
+      default:
+        throw "Unhandled target!";
+    }
   }
   
   inline public function new(a:Channel, r:Channel, g:Channel, b:Channel, name:String = "PixelFormat"):Void {
@@ -736,4 +754,58 @@ abstract Pixel(Int) from Int to Int
   @:op(A << B) static function shl(a:Pixel, b:Pixel):Pixel;
   @:op(A << B) static function shlInt(a:Pixel, b:Int):Pixel;
   @:op(A << B) static function intShl(a:Int, b:Pixel):Pixel;
+}
+
+@:enum abstract TargetType(String) {
+  var FLASH = "flash";
+  var FORMAT = "format";
+  var FLAMBE_FLASH = "flambe flash";
+  var FLAMBE_WEB = "flambe web";
+  var LUXE = "luxe";
+  var OPENFL_JS = "openfl js";
+  var OPENFL_DESKTOP = "openfl desktop";
+  var OPENFL_FLASH = "openfl flash";
+  var NME_DESKTOP = "nme desktop";
+  var NME_FLASH = "nme flash";
+  var JAVA = "java";
+  var JS = "js";
+  var UNKNOWN = "unknown";
+  
+  static public inline function getCurrent():TargetType {
+  #if (flash && !(openfl || nme || flambe))
+    return FLASH;
+  #elseif (luxe || snow)
+    return LUXE;
+  #elseif flambe
+    #if (flash)
+      return FLAMBE_FLASH;
+    #else
+      return FLAMBE_WEB;
+    #end
+  #elseif (openfl && !nme)
+    #if (js)
+      return OPENFL_JS;
+    #elseif (neko || cpp)
+      return OPENFL_DESKTOP;
+    #elseif flash
+      return OPENFL_FLASH;
+    #else
+      return UNKNOWN;
+    #end
+  #elseif (nme)
+    #if (neko || cpp)
+      return NME_DESKTOP;
+    #elseif flash
+      return NME_FLASH;
+    #else
+      return UNKNOWN;
+    #end
+  #elseif java
+    return JAVA;
+  #elseif js
+    return JS;
+  #else
+    return UNKNOWN;
+  #end
+  }
 }
