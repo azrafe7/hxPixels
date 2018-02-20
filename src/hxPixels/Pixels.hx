@@ -363,7 +363,7 @@ abstract Pixels(PixelsData)
     #elseif (openfl_next || openfl >= "4.0.0")
       
       //trace("!flash openfl");
-      bmd.image.buffer.data = openfl.utils.UInt8Array.fromBytes(this.bytes);
+      bmd.image.buffer.data = lime.utils.UInt8Array.fromBytes(this.bytes);
       
       #if (openfl >= "4.0.0")
         
