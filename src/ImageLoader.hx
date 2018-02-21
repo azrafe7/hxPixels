@@ -52,9 +52,12 @@ class ImageLoader
     
     // resolve classNames to classes
     if (Std.is(bmdClassesOrClassNames[0], String)) {
-      for (clsName in bmdClassesOrClassNames) {
+      var emptyLine = "";
+      for (i in 0...bmdClassesOrClassNames.length) {
+        var clsName = bmdClassesOrClassNames[i];
         var resolvedClass = Type.resolveClass(clsName);
-        trace(clsName + ": " + (resolvedClass != null ? "ok" : "null"));
+        if (i == bmdClassesOrClassNames.length - 1) emptyLine = "\n";
+        trace(clsName + ": " + (resolvedClass != null ? "ok" : "null") + emptyLine);
         bmdClasses.push(cast resolvedClass);
       }
     } else {

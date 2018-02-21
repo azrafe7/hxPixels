@@ -42,7 +42,6 @@ class AbstractPixelsDemo extends Sprite {
   
   function runTests(bmds:Array<BitmapData>, titles:Array<String>) {
     for (i in 0...bmds.length) {
-      if (i == 0) trace("");
       test(bmds[i], titles[i]);
     }
   }
