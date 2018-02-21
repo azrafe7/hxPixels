@@ -284,7 +284,7 @@ abstract Pixels(PixelsData)
 #if (!macro && (flash || openfl || nme || (flambe && flash)))
 
   @:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
-  #if js	
+  #if (js && !jsprime)	
   
     var pixels = new Pixels(bmd.width, bmd.height, false);
     pixels.format = PixelFormat.RGBA;
@@ -332,7 +332,7 @@ abstract Pixels(PixelsData)
   }
   
   public function applyToBitmapData(bmd:flash.display.BitmapData) {
-  #if js
+  #if (js && !jsprime)
     
     var image = bmd.image;
     
