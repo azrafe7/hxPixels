@@ -58,7 +58,11 @@ class AbstractPixelsDemo extends Sprite {
     var titles = [for (assetName in assetFileNames) assetName];
     titles.push("Generated BMD");
     
-  #if use_loader
+  #if (use_loader && jsprime)
+    trace(" -- JSPRIME: SKIPPING ImageLoader --");
+  #end
+  
+  #if (use_loader && !jsprime)
     
     var loader = new ImageLoader();
     trace(" -- USING ImageLoader --");
@@ -72,8 +76,11 @@ class AbstractPixelsDemo extends Sprite {
     
   #else
     
-    for (assetName in assetFileNames) {
-      trace(assetName + ": " + (openfl.Assets.exists(assetName) ? "ok" : "not exists"));
+    var emptyLine = "";
+    for (i in 0...assetFileNames.length) {
+      var assetName = assetFileNames[i];
+      if (i == assetFileNames.length - 1) emptyLine = "\n";
+      trace(assetName + ": " + (openfl.Assets.exists(assetName) ? "ok" : "not exists") + emptyLine);
       var bmd = openfl.Assets.getBitmapData(assetName, false);
       bmds.push(bmd);
     }
@@ -131,7 +138,7 @@ class AbstractPixelsDemo extends Sprite {
     
     // trace info
     trace("pixels      " + pixels.width, pixels.height, pixels.count, "0x" + StringTools.hex(pixels.getPixel32(50, 50), 8));
-  #if !(html5 && openfl_legacy)
+  #if (jsprime || !(html5 && openfl_legacy))
     trace("bitmapData  " + bitmapData.width, bitmapData.height, bitmapData.width * bitmapData.height, "0x" + StringTools.hex(bitmapData.getPixel32(50, 50), 8) + "\n");
   #end
   }

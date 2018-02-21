@@ -79,7 +79,7 @@ class ImageLoader
       var bmdClass = bmdClasses[i];
       var name = Type.getClassName(bmdClass);
     
-    #if html5	// for html5 the loading is async
+    #if html5 // for openfl html5 the loading is async
       Type.createInstance(bmdClass, [0, 0, true, 0, function(bmd) { 
         if (timedOut) return;
         map[name] = bmd;
