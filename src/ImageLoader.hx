@@ -21,6 +21,10 @@
  * 		var loader = new ImageLoader();
  * 		
  *		loader.load([Heart, BackDrop], onLoaded, 2000, onTimeOut);
+ *		
+ *    // or
+ * 
+ *    loader.load(["Heart", "BackDrop"], onLoaded, 2000, onTimeOut);
  * 		...
  * 
  * 		function onLoaded(_) {
@@ -40,14 +44,26 @@ class ImageLoader
 		map = new Map<String, flash.display.BitmapData>();
 	}
 	
-	public function load(bmdClasses:Array<Class<flash.display.BitmapData>>, onComplete:ImageLoader->Void, timeOutMs:Int = 0, ?onTimeOut:ImageLoader->Void) {
-		var count = bmdClasses.length;	
+	public function load(bmdClassesOrClassNames:Array<Dynamic>, onComplete:ImageLoader->Void, timeOutMs:Int = 0, ?onTimeOut:ImageLoader->Void) {
+		var count = bmdClassesOrClassNames.length;	
 		var timedOut = false;
 
+    var bmdClasses:Array<Class<flash.display.BitmapData>> = [];
+    
+    // resolve classNames to classes
+    if (Std.is(bmdClassesOrClassNames[0], String)) {
+      for (clsName in bmdClassesOrClassNames) {
+        var resolvedClass = Type.resolveClass(clsName);
+        trace(clsName + ": " + (resolvedClass != null ? "ok" : "null"));
+        bmdClasses.push(cast resolvedClass);
+      }
+    } else {
+      bmdClasses = cast bmdClassesOrClassNames;
+    }
+    
 		// timeout handler
 		if (count > 0 && timeOutMs > 0) {
 			haxe.Timer.delay(function ():Void {
-        trace("endtimer");
 				if (count != 0) {
 					timedOut = true;
 					if (onTimeOut != null) onTimeOut(this);
