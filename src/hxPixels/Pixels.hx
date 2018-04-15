@@ -27,7 +27,7 @@ import haxe.io.UInt32Array;
 @:native("Pixels")
 abstract Pixels(PixelsData)
 {
-  static inline var CHANNEL_MASK:Int = 3;
+  static public inline var CHANNEL_MASK:Int = 3;
   
   /** 
    * Constructor. If `alloc` is false no memory will be allocated for `bytes`, 
@@ -485,6 +485,7 @@ private class PixelsData
 
 @:expose
 @:allow(hxPixels.Pixels)
+@:allow(hxPixels.Pixel)
 class PixelFormat {
   
   static public var ARGB(default, null):PixelFormat;
@@ -504,6 +505,29 @@ class PixelFormat {
     ARGB = new PixelFormat(CH_0, CH_1, CH_2, CH_3, "ARGB");
     RGBA = new PixelFormat(CH_3, CH_0, CH_1, CH_2, "RGBA");
     BGRA = new PixelFormat(CH_3, CH_2, CH_1, CH_0, "BGRA");
+  }
+  
+  /** 
+   * Rearranges the bytes of a pixel/Int in `fromFormat` to a new pixel in `toFormat`.
+   * 
+   * E.g.:
+   *
+   *   `var argb:Pixel = 0xAA2266BB; // 0xaarrggbb
+   * 
+   *    //                            <input>      <from>             <to>             <result>
+   *    var same  = PixelFormat.convert(argb, PixelFormat.ARGB, PixelFormat.ARGB); // 0xAA2266BB
+   *    var rgba  = PixelFormat.convert(same, PixelFormat.ARGB, PixelFormat.RGBA); // 0x2266BBAA
+   *    var bgra  = PixelFormat.convert(rgba, PixelFormat.RGBA, PixelFormat.BGRA); // 0xBB6622AA
+   *    var back  = PixelFormat.convert(bgra, PixelFormat.BGRA, PixelFormat.ARGB); // 0xAA2266BB
+   *    var rgba2 = PixelFormat.convert(bgra, PixelFormat.BGRA, PixelFormat.RGBA); // 0x2266BBAA`
+   * 
+   */
+  static public function convert(px:Pixel, fromFormat:PixelFormat, toFormat:PixelFormat):Pixel {
+    return  
+      (((px >> (8 * (Pixels.CHANNEL_MASK - fromFormat.A))) & 0xFF) << (8 * (Pixels.CHANNEL_MASK - toFormat.A))) |
+      (((px >> (8 * (Pixels.CHANNEL_MASK - fromFormat.R))) & 0xFF) << (8 * (Pixels.CHANNEL_MASK - toFormat.R))) |
+      (((px >> (8 * (Pixels.CHANNEL_MASK - fromFormat.G))) & 0xFF) << (8 * (Pixels.CHANNEL_MASK - toFormat.G))) |
+      (((px >> (8 * (Pixels.CHANNEL_MASK - fromFormat.B))) & 0xFF) << (8 * (Pixels.CHANNEL_MASK - toFormat.B)));
   }
   
   inline static public function getNativeFormatFor(target:TargetType):PixelFormat {
@@ -558,6 +582,9 @@ class PixelFormat {
 }
 
 @:enum abstract Channel(Int) to Int {
+  
+  static public var MASK = [0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF];
+  
   var CH_0 = 0;
   var CH_1 = 1;
   var CH_2 = 2;
@@ -594,6 +621,15 @@ class PixelFormat {
 @:native("Pixel")
 abstract Pixel(Int) from Int to Int 
 {
+  inline public function getChannel(ch:Channel):Int {
+    return (this >> (8 * (Pixels.CHANNEL_MASK - ch))) & 0xFF;
+  }
+  
+  inline public function setChannel(ch:Channel, value:Int):Int {
+    this = (this & ~Channel.MASK[ch]) | (value << (8 * (Pixels.CHANNEL_MASK - ch)));
+    return value;
+  }
+  
   public var A(get, set):Int;
   inline private function get_A():Int {
     return (this >> 24) & 0xFF;
