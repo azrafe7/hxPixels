@@ -621,6 +621,36 @@ class PixelFormat {
 @:native("Pixel")
 abstract Pixel(Int) from Int to Int 
 {
+  inline static public function fclamp(value:Float):Float {
+    if (value <= 0.) return 0.;
+    else if (value >= 1.) return 1.;
+    else return value;
+  } 
+  
+  inline static public function iclamp(value:Int):Int {
+    if (value <= 0) return 0;
+    else if (value >= 255) return 255;
+    else return value;
+  }
+  
+  inline public function multiplyAlpha():Pixel {
+    var fA = (this:Pixel).fA;
+    return 
+      (this & 0xFF000000) | 
+      (iclamp(Math.round(fA * (this:Pixel).R)) << 16) |
+      (iclamp(Math.round(fA * (this:Pixel).G)) <<  8) |
+      (iclamp(Math.round(fA * (this:Pixel).B)));
+  }
+  
+  inline public function unmultiplyAlpha():Pixel {
+    var inv_fA = 1. / ((this:Pixel).fA + 0.00000001); // inc fA to avoid divide_by_zero special case
+    return 
+      (this & 0xFF000000) | 
+      (iclamp(Math.round(inv_fA * (this:Pixel).R)) << 16) |
+      (iclamp(Math.round(inv_fA * (this:Pixel).G)) <<  8) |
+      (iclamp(Math.round(inv_fA * (this:Pixel).B)));
+  }
+  
   inline public function getChannel(ch:Channel):Int {
     return (this >> (8 * (Pixels.CHANNEL_MASK - ch))) & 0xFF;
   }
