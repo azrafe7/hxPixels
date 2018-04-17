@@ -283,6 +283,9 @@ abstract Pixels(PixelsData)
 
 #if (!macro && (flash || openfl || nme || (flambe && flash)))
 
+  // NOTE: in openfl (and possibly nme) the texture pixels _might_ be in premultipliedAlpha format.
+  //       cfr. `bmd.image.buffer.premultiplied` (openfl) and `bmd.premultipliedAlpha` (nme)
+
   @:from static public function fromBitmapData(bmd:flash.display.BitmapData) {
   #if (js && !jsprime)	
   
