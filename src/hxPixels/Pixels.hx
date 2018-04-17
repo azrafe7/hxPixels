@@ -633,22 +633,34 @@ abstract Pixel(Int) from Int to Int
     else return value;
   }
   
+  inline static public function iround(value:Float):Int {
+    return Std.int(value + .5);
+  }
+  
   inline public function multiplyAlpha():Pixel {
     var fA = (this:Pixel).fA;
     return 
       (this & 0xFF000000) | 
-      (iclamp(Math.round(fA * (this:Pixel).R)) << 16) |
-      (iclamp(Math.round(fA * (this:Pixel).G)) <<  8) |
-      (iclamp(Math.round(fA * (this:Pixel).B)));
+      (iclamp(iround(fA * (this:Pixel).R)) << 16) |
+      (iclamp(iround(fA * (this:Pixel).G)) <<  8) |
+      (iclamp(iround(fA * (this:Pixel).B)));
   }
   
   inline public function unmultiplyAlpha():Pixel {
     var inv_fA = 1. / ((this:Pixel).fA + 0.00000001); // inc fA to avoid divide_by_zero special case
     return 
       (this & 0xFF000000) | 
-      (iclamp(Math.round(inv_fA * (this:Pixel).R)) << 16) |
-      (iclamp(Math.round(inv_fA * (this:Pixel).G)) <<  8) |
-      (iclamp(Math.round(inv_fA * (this:Pixel).B)));
+      (iclamp(iround(inv_fA * (this:Pixel).R)) << 16) |
+      (iclamp(iround(inv_fA * (this:Pixel).G)) <<  8) |
+      (iclamp(iround(inv_fA * (this:Pixel).B)));
+  }
+  
+  inline static public function create(a:Int, r:Int, g:Int, b:Int):Pixel {
+    return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | b;
+  }
+  
+  inline static public function fcreate(a:Float, r:Float, g:Float, b:Float):Pixel {
+    return create(Std.int(a * 255.), Std.int(r * 255.), Std.int(g * 255.), Std.int(b * 255.));
   }
   
   inline public function getChannel(ch:Channel):Int {
