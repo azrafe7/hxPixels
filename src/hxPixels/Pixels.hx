@@ -896,7 +896,13 @@ abstract Pixel(Int) from Int to Int
   var LITTLE = 1;
   
   static public var names = ["BIG_ENDIAN", "LITTLE_ENDIAN"];
-  
+ 
+  /** 
+   * Get system endianness.
+   * 
+   * NOTE: It _might_ differ from actual texture bytes implementation 
+   *       (e.g. flash usually uses BIG_ENDIAN even though the host system is LITTLE_ENDIAN). 
+   */
   static public function getCurrent():Endiannes {
     var a:UInt32Array = UInt32Array.fromArray([0xDDCCBBAA]);
     var b:UInt8Array = UInt8Array.fromBytes(a.view.buffer);
