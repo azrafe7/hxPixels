@@ -887,3 +887,21 @@ abstract Pixel(Int) from Int to Int
   #end
   }
 }
+
+@:enum abstract Endiannes(Int) to Int {
+  var BIG = 0;
+  var LITTLE = 1;
+  
+  static public var names = ["BIG_ENDIAN", "LITTLE_ENDIAN"];
+  
+  static public function getCurrent():Endiannes {
+    var a:UInt32Array = UInt32Array.fromArray([0xDDCCBBAA]);
+    var b:UInt8Array = UInt8Array.fromBytes(a.view.buffer);
+    if (b[0] == 0xDD) return BIG;
+    else /*if (b[0] == 0xAA)*/ return LITTLE;
+  }
+  
+  inline static public function getName(endian:Endiannes) {
+    return names[endian];
+  }
+}
