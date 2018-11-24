@@ -36,7 +36,7 @@ For the supported libs the following methods are implemented (**note** that all 
 See the [src folder](https://github.com/azrafe7/hxPixels/tree/master/src) for examples on how to use it, and please file an issue if you have problems or spot a bug.
 
 ### Warning
-The code abstracting bitmaps from the above-mentioned libs is stricly coupled with their internal implementations, so it can easily break when they update.
+The code abstracting bitmaps from the above-mentioned libs is strictly coupled with their internal implementations, so it can easily break when they update.
 It may still be useful to work with pixels on a _generic_ bitmap structure.
 
 ### License (MIT)
