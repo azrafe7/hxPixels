@@ -4,6 +4,14 @@ import haxe.io.Bytes;
 import haxe.io.UInt8Array;
 import haxe.io.UInt32Array;
 
+#if openfl
+  #if (openfl >= "8.0.0")
+    typedef LimeImageCanvasUtil = lime._internal.graphics.ImageCanvasUtil;
+  #else
+    typedef LimeImageCanvasUtil = lime.graphics.utils.ImageCanvasUtil;
+  #end
+#end
+
 
 /**
  * Class abstracting pixels for various libs/targets (for easier manipulation).
@@ -294,8 +302,8 @@ abstract Pixels(PixelsData)
 
     // force buffer creation
     var image = bmd.image;
-    lime.graphics.utils.ImageCanvasUtil.convertToCanvas(image);
-    lime.graphics.utils.ImageCanvasUtil.createImageData(image);
+    LimeImageCanvasUtil.convertToCanvas(image);
+    LimeImageCanvasUtil.createImageData(image);
 
     var data = image.buffer.data;
     pixels.bytes = Bytes.ofData(data.buffer);
@@ -341,7 +349,7 @@ abstract Pixels(PixelsData)
 
     #if (openfl < "4.0.0")
 
-      lime.graphics.utils.ImageCanvasUtil.convertToData(image);
+      LimeImageCanvasUtil.convertToData(image);
       image.dirty = true;
 
     #else
@@ -891,7 +899,7 @@ abstract Pixel(Int) from Int to Int
   }
 }
 
-@:enum abstract Endiannes(Int) to Int {
+@:enum abstract Endianness(Int) to Int {
   var BIG = 0;
   var LITTLE = 1;
 
