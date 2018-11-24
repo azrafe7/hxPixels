@@ -11,7 +11,9 @@
 -resource assets/global/framechanges-2.gif@framechanges-2.gif
 -resource assets/global/transparent.gif@transparent.gif
 -resource assets/global/Fighter_attack.gif@Fighter_attack.gif
--x bin/format/neko/FormatAbstractPixelsDemo
+# uncomment the line below if on haxe >= 4
+#--run FormatAbstractPixelsDemo
+-x FormatAbstractPixelsDemo
 
 --next
 -cp src/
