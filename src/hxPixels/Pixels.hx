@@ -47,9 +47,24 @@ abstract Pixels(PixelsData)
   }
 
   /** Returns the byte value at `i` position, as if the data were in ARGB format. */
-  @:arrayAccess
   inline public function getByte(i:Int) {
     return this.bytes.get((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK]);
+  }
+
+  /**
+   * Returns the raw pixel value (32-bits) at `i` position.
+   *
+   * NOTE: `i` is multiplied by 4, to align to pixel values (e.g. `getRawInt32(3)` returns the 4th pixel).
+   */
+  @:arrayAccess
+  inline public function getRawInt32(i:Int) {
+    return this.bytes.getInt32(i << 2);
+  }
+
+  /** Returns the raw pixel value (with alpha) at `x`,`y`, in the original source format. */
+  inline public function getRawPixel32(x:Int, y:Int):Pixel {
+    var pos = (y * this.width + x) << 2;
+    return this.bytes.getInt32(pos);
   }
 
   /** Returns the pixel value (without alpha) at `x`,`y`, as if the data were in ARGB format. */
@@ -76,9 +91,24 @@ abstract Pixels(PixelsData)
   }
 
   /** Sets the byte value at `i` pos, as if the data were in ARGB format. */
-  @:arrayAccess
   inline public function setByte(i:Int, value:Int) {
     this.bytes.set((i & ~CHANNEL_MASK) + this.format.channelMap[i & CHANNEL_MASK], value);
+  }
+
+  /**
+   * Sets the raw pixel value (32-bits) at `i` position.
+   *
+   * NOTE: `i` is multiplied by 4, to align to pixel values (e.g. `setRawInt32(3, 0xFF010203)` sets the 4th pixel).
+   */
+  @:arrayAccess
+  inline public function setRawInt32(i:Int, value:Int) {
+    this.bytes.setInt32(i << 2, value);
+  }
+
+  /** Sets the raw pixel value (with alpha) at `x`,`y`, in the original source format. */
+  inline public function setRawPixel32(x:Int, y:Int, value:Int) {
+    var pos = (y * this.width + x) << 2;
+    return this.bytes.setInt32(pos, value);
   }
 
   /** Sets the pixel value (without alpha) at `x`,`y`, with `value` expressed in RGB format. */
