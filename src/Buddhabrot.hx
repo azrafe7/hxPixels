@@ -3,9 +3,15 @@
 import hxPixels.Pixels;
 
 
-typedef XY = {
-  var x:Float;
-  var y:Float;
+@:structInit
+class XY {
+  public var x:Float;
+  public var y:Float;
+
+  public function new(x:Float, y:Float)   {
+    this.x = x;
+    this.y = y;
+  }
 }
 
 /**
@@ -22,8 +28,8 @@ class Buddhabrot {
   }
 
   // Image dimensions
-  static inline var NX:Int = 1000;
-  static inline var NY:Int = 1000;
+  static inline var NX:Int = 500;
+  static inline var NY:Int = 300;
 
   // Length of sequence to test escape status
   // Also known as bailout
@@ -61,8 +67,8 @@ class Buddhabrot {
         var result = iterate(x, y, xyseq);
         if (result.escaped) {
           for (i in 0...result.n) {
-            ix = Math.round(0.3 * NX * (xyseq[i].x + 0.5) + NX / 2);
-            iy = Math.round(0.3 * NY * xyseq[i].y + NY / 2);
+            ix = Math.round(0.3 * NX * (xyseq[i].x + 0.0) + NX / 2);
+            iy = Math.round(0.3 * NY * (xyseq[i].y + 0.5) + NY / 2);
             if (ix >= 0 && iy >= 0 && ix < NX && iy < NY)
               image[iy * NX + ix]++;
           }
@@ -73,26 +79,26 @@ class Buddhabrot {
     trace("Elapsed: " + (haxe.Timer.stamp() - t0) + "s");
 
     // Save the result
-    writeImage("buddha_single.png", image, NX, NY);
+    writeImage("buddha.png", image, NX, NY);
   }
 
   /**
     Iterate the Mandelbrot and return true if the point escapes
   */
-  static function iterate(x0:Float, y0:Float, seq:Array<XY>):{n:Int, escaped:Bool} {
+  static inline function iterate(x0:Float, y0:Float, seq:Array<XY>):{n:Int, escaped:Bool} {
     var n = 0;
     var result = {n:n, escaped:false};
     var x = 0.0, y = 0.0, xnew = 0.0, ynew = 0.0;
 
     for (i in 0...NMAX) {
-      xnew = x * x - y * y + x0;
-      ynew = 2 * x * y + y0;
+      ynew = y * y - x * x + y0;
+      xnew = 2 * y * x + x0;
       seq[i].x = xnew;
       seq[i].y = ynew;
       if (xnew * xnew + ynew * ynew > 10) {
         result.n = i;
         result.escaped = true;
-        return result;
+        break;
       }
       x = xnew;
       y = ynew;
