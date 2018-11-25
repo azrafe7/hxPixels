@@ -1,4 +1,4 @@
-// ported from http://paulbourke.net/fractals/buddhabrot/buddha.c
+// adapted/ported from http://paulbourke.net/fractals/buddhabrot/buddha.c
 
 import hxPixels.Pixels;
 
@@ -29,7 +29,7 @@ class Buddhabrot {
 
   // Image dimensions
   static inline var NX:Int = 500;
-  static inline var NY:Int = 300;
+  static inline var NY:Int = 500;
 
   // Length of sequence to test escape status
   // Also known as bailout
@@ -50,7 +50,8 @@ class Buddhabrot {
     var x:Float, y:Float;
 
     // The density plot image (cleared to black)
-    var image = [for (i in 0...NX * NY) 0];
+    var image = new Pixels(NX, NY, true);
+    image.fillRect(0, 0, NX, NY, 0);
 
     // Alloc space for the sequence
     var xyseq:Array<XY> = [for (i in 0...NMAX) {x:0, y:0}];
@@ -76,7 +77,7 @@ class Buddhabrot {
       } // t
     } // tt
 
-    trace("Elapsed: " + (haxe.Timer.stamp() - t0) + "s");
+    trace("Generated in " + (haxe.Timer.stamp() - t0) + "s");
 
     // Save the result
     writeImage("buddha.png", image, NX, NY);
@@ -110,7 +111,9 @@ class Buddhabrot {
   /**
     Write the buddha image to a PNG file.
   */
-  static function writeImage(fileName:String, image:Array<Int>, width:Int, height:Int):Void {
+  static function writeImage(fileName:String, image:Pixels, width:Int, height:Int):Void {
+    var t0 = haxe.Timer.stamp();
+
     var ramp:Float, biggest = Math.NEGATIVE_INFINITY, smallest = Math.POSITIVE_INFINITY;
 
     var dir = haxe.io.Path.directory(Sys.programPath());
@@ -126,26 +129,27 @@ class Buddhabrot {
     trace('Density value range: $smallest to $biggest');
 
     // Write the image
-    trace('Writing "$fileName" (in "$dir")');
+    trace('Writing "$fileName" (in "$dir")...');
 
     var pixels = new Pixels(width, height, true);
     var bytes = pixels.bytes;
 
-    // Raw uncompressed bytes
+    var pixel:Pixel = 0;
+
+    // Raw bytes
     for (i in 0...width * height) {
       ramp = 2 * (image[i] - smallest) / (biggest - smallest);
-      if (ramp > 1)
-        ramp = 1;
+      if (ramp > 1) ramp = 1;
       ramp = Math.pow(ramp, 0.5);
-      var pos = i << 2;
-      bytes.set(pos + 0, 255);
-      bytes.set(pos + 1, Std.int(ramp * 255));
-      bytes.set(pos + 2, Std.int(ramp * 255));
-      bytes.set(pos + 3, Std.int(ramp * 255));
+      pixel = Pixel.fcreate(Pixel.fclamp(ramp * 1.4), Pixel.fclamp(ramp * .9), ramp, 1.); // raw pixel (0xBBGGRRAA)
+      if (ramp < .3) pixel.setChannel(CH_0, Std.int(ramp * 255));
+      pixels[i] = pixel;
     }
 
     var pngData = format.png.Tools.build32ARGB(pixels.width, pixels.height, pixels.bytes);
     pngWriter.write(pngData);
     file.close();
+
+    trace("Written in " + (haxe.Timer.stamp() - t0) + "s");
   }
 }
