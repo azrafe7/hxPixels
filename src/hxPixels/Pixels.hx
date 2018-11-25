@@ -4,7 +4,7 @@ import haxe.io.Bytes;
 import haxe.io.UInt8Array;
 import haxe.io.UInt32Array;
 
-#if openfl
+#if (openfl && !nme)
   #if (openfl >= "8.0.0")
     typedef LimeImageCanvasUtil = lime._internal.graphics.ImageCanvasUtil;
   #else
